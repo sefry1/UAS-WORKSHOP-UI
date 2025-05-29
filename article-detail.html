@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Artikel - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .article-detail-container {
+            margin-top: 100px;
+            padding: 2rem 0;
+        }
+        
+        .article-header {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            text-align: center;
+        }
+        
+        .article-category {
+            background: #e74c3c;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .article-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+        }
+        
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .article-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .article-image {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 0 auto 3rem;
+            display: block;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .article-content {
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        
+        .article-content h2 {
+            color: #333;
+            margin: 2rem 0 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .article-content h3 {
+            color: #333;
+            margin: 1.5rem 0 1rem;
+            font-size: 1.4rem;
+        }
+        
+        .article-content p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .article-content ul, .article-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+        
+        .article-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .article-content blockquote {
+            background: #f8f9fa;
+            border-left: 4px solid #e74c3c;
+            padding: 1rem 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .article-actions {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .social-share {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .social-btn {
+            padding: 10px 15px;
+            border-radius: 50px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.3s;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+        
+        .social-btn.facebook { background: #3b5998; }
+        .social-btn.twitter { background: #1da1f2; }
+        .social-btn.whatsapp { background: #25d366; }
+        .social-btn.linkedin { background: #0077b5; }
+        
+        .related-articles {
+            max-width: 1200px;
+            margin: 4rem auto 0;
+        }
+        
+        .related-articles h3 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            color: #333;
+        }
+        
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .related-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .related-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .related-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .related-card-content {
+            padding: 1.5rem;
+        }
+        
+        .related-card h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .related-card p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .breadcrumb {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            color: #666;
+        }
+        
+        .breadcrumb a {
+            color: #e74c3c;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .article-title {
+                font-size: 2rem;
+            }
+            
+            .article-meta {
+                gap: 1rem;
+            }
+            
+            .article-image {
+                height: 250px;
+            }
+            
+            .social-share {
+                flex-wrap: wrap;
+            }
+            
+            .related-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html">Artikel</a></li>
+                    <li><a href="cart.html">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html">Riwayat</a></li>
+                    <li><a href="admin-dashboard.html" class="admin-link">Admin</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="article-detail-container">
+        <div class="container">
+            <!-- Breadcrumb -->
+            <nav class="breadcrumb">
+                <a href="index.html">Beranda</a> > 
+                <a href="articles.html">Artikel</a> > 
+                <span id="current-article">Detail Artikel</span>
+            </nav>
+            
+            <!-- Article Content -->
+            <div id="article-detail">
+                <!-- Article content will be loaded here -->
+            </div>
+            
+            <!-- Related Articles -->
+            <section class="related-articles">
+                <h3>Artikel Terkait</h3>
+                <div class="related-grid" id="related-articles">
+                    <!-- Related articles will be loaded here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko pakaian online terpercaya dengan koleksi fashion terbaru dan berkualitas.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="cart.html">Keranjang</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <p><i class="fas fa-envelope"></i> info@fashionstore.com</p>
+                    <p><i class="fas fa-phone"></i> +62 123 456 7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let currentArticle = null;
+        let allArticles = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArticleDetail();
+            updateCartCount();
+        });
+
+function loadArticleDetail() {
+    const articleId = parseInt(getUrlParameter('id'));
+    if (!articleId) {
+        window.location.href = 'articles.html';
+        return;
+    }
+
+    // Load articles from localStorage
+    const savedArticles = localStorage.getItem('articles');
+    if (savedArticles) {
+        allArticles = JSON.parse(savedArticles);
+        // Filter hanya artikel yang dipublikasi
+        allArticles = allArticles.filter(article => article.status === 'published');
+    }
+
+    // Jika tidak ada artikel di localStorage, gunakan data default
+    if (allArticles.length === 0) {
+        allArticles = [
+            {
+                id: 1,
+                title: "10 Tips Berpakaian untuk Musim Hujan",
+                excerpt: "Musim hujan tidak berarti Anda harus mengorbankan gaya. Pelajari tips berpakaian stylish yang tetap praktis untuk cuaca basah.",
+                content: `
+                    <p>Musim hujan seringkali menjadi tantangan tersendiri dalam berpakaian. Cuaca yang tidak menentu, jalanan yang becek, dan kelembaban tinggi membuat kita harus lebih selektif dalam memilih outfit. Namun, bukan berarti Anda harus mengorbankan gaya demi kenyamanan.</p>
+
+                    <h2>1. Pilih Material yang Tepat</h2>
+                    <p>Material pakaian menjadi kunci utama dalam berpakaian saat musim hujan. Hindari material yang mudah menyerap air seperti katun tebal atau linen. Sebaliknya, pilih material yang cepat kering seperti polyester, nylon, atau material dengan teknologi quick-dry.</p>
+
+                    <h2>2. Layering adalah Kunci</h2>
+                    <p>Teknik layering atau berlapis-lapis sangat penting saat musim hujan. Mulai dengan base layer yang tipis dan breathable, tambahkan middle layer untuk kehangatan, dan outer layer yang waterproof sebagai pelindung utama.</p>
+
+                    <blockquote>
+                        "Fashion is about dressing according to what's fashionable. Style is more about being yourself." - Oscar de la Renta
+                    </blockquote>
+
+                    <h2>3. Investasi pada Sepatu yang Tepat</h2>
+                    <p>Sepatu waterproof atau rain boots adalah investasi yang sangat berharga. Pilih yang memiliki sol anti-slip untuk keamanan ekstra saat berjalan di permukaan basah.</p>
+
+                    <h3>Tips Memilih Sepatu Hujan:</h3>
+                    <ul>
+                        <li>Pilih yang memiliki sertifikasi waterproof</li>
+                        <li>Pastikan sol memiliki grip yang baik</li>
+                        <li>Pilih warna netral yang mudah dipadukan</li>
+                        <li>Perhatikan tinggi sepatu sesuai kebutuhan</li>
+                    </ul>
+
+                    <h2>4. Aksesoris Pelindung</h2>
+                    <p>Jangan lupakan aksesoris pelindung seperti payung, topi waterproof, atau rain coat. Pilih yang compact dan mudah dibawa kemana-mana.</p>
+
+                    <h2>5. Warna dan Pola yang Tepat</h2>
+                    <p>Pilih warna-warna yang tidak mudah terlihat kotor seperti navy, hitam, atau abu-abu gelap. Hindari warna terang yang mudah menunjukkan noda air atau lumpur.</p>
+                `,
+                category: "fashion-tips",
+                categoryName: "Tips Fashion",
+                author: "Sarah Fashion",
+                date: "2024-01-15",
+                image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=400&fit=crop",
+                featured: true,
+                views: 1250,
+                readTime: "5 menit",
+                status: "published"
+            },
+            {
+                id: 2,
+                title: "Tren Warna Fashion 2024",
+                excerpt: "Warna-warna yang akan mendominasi dunia fashion tahun ini. Dari earth tone hingga bold colors yang berani.",
+                content: `
+                    <p>Tahun 2024 membawa berbagai tren warna yang menarik dan beragam. Dari nuansa earth tone yang menenangkan hingga bold colors yang berani, mari kita eksplorasi warna-warna yang akan mendominasi dunia fashion tahun ini.</p>
+
+                    <h2>Earth Tone: Kembali ke Alam</h2>
+                    <p>Warna-warna earth tone seperti terracotta, sage green, dan warm brown menjadi pilihan utama. Warna-warna ini memberikan kesan natural dan menenangkan, cocok untuk gaya hidup yang lebih sustainable.</p>
+
+                    <h2>Bold Colors: Berani Tampil Beda</h2>
+                    <p>Di sisi lain, bold colors seperti electric blue, vibrant orange, dan hot pink juga menjadi tren. Warna-warna ini cocok untuk mereka yang ingin tampil berani dan percaya diri.</p>
+                `,
+                category: "trends",
+                categoryName: "Tren Terbaru",
+                author: "Maya Style",
+                date: "2024-01-12",
+                image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=400&fit=crop",
+                featured: false,
+                views: 980,
+                readTime: "4 menit",
+                status: "published"
+            },
+            {
+                id: 3,
+                title: "Cara Mix and Match Outfit Kasual",
+                excerpt: "Panduan lengkap untuk menciptakan outfit kasual yang stylish dengan item-item basic di lemari Anda.",
+                content: `
+                    <p>Mix and match adalah seni dalam berpakaian yang memungkinkan Anda menciptakan berbagai look dengan item-item basic yang sudah ada di lemari. Dengan teknik yang tepat, Anda bisa tampil stylish setiap hari tanpa harus membeli baju baru terus-menerus.</p>
+
+                    <h2>Dasar-dasar Mix and Match</h2>
+                    <p>Mulai dengan memahami warna dasar yang mudah dipadukan seperti hitam, putih, navy, dan abu-abu. Item-item dalam warna ini akan menjadi foundation yang kuat untuk berbagai kombinasi.</p>
+                `,
+                category: "styling",
+                categoryName: "Styling Guide",
+                author: "Rina Fashion",
+                date: "2024-01-10",
+                image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=800&h=400&fit=crop",
+                featured: false,
+                views: 1100,
+                readTime: "6 menit",
+                status: "published"
+            }
+        ];
+    }
+
+    currentArticle = allArticles.find(article => article.id === articleId);
+    
+    if (!currentArticle) {
+        document.getElementById('article-detail').innerHTML = `
+            <div style="text-align: center; padding: 3rem;">
+                <h2>Artikel tidak ditemukan</h2>
+                <p>Artikel yang Anda cari tidak tersedia.</p>
+                <a href="articles.html" class="btn btn-primary">Kembali ke Artikel</a>
+            </div>
+        `;
+        return;
+    }
+
+    displayArticle();
+    loadRelatedArticles();
+    
+    // Update breadcrumb
+    document.getElementById('current-article').textContent = currentArticle.title;
+    
+    // Update page title
+    document.title = `${currentArticle.title} - FashionStore`;
+}
+
+        function displayArticle() {
+            document.getElementById('article-detail').innerHTML = `
+                <article>
+                    <header class="article-header">
+                        <span class="article-category">${currentArticle.categoryName}</span>
+                        <h1 class="article-title">${currentArticle.title}</h1>
+                        <div class="article-meta">
+                            <div class="article-meta-item">
+                                <i class="fas fa-user"></i>
+                                <span>${currentArticle.author}</span>
+                            </div>
+                            <div class="article-meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>${formatDate(currentArticle.date)}</span>
+                            </div>
+                            <div class="article-meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>${currentArticle.readTime}</span>
+                            </div>
+                            <div class="article-meta-item">
+                                <i class="fas fa-eye"></i>
+                                <span>${currentArticle.views} views</span>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <img src="${currentArticle.image}" alt="${currentArticle.title}" class="article-image">
+                    
+                    <div class="article-content">
+                        ${currentArticle.content}
+                    </div>
+                </article>
+                
+                <div class="article-actions">
+                    <h3>Bagikan Artikel Ini</h3>
+                    <div class="social-share">
+                        <a href="#" onclick="shareToFacebook()" class="social-btn facebook">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </a>
+                        <a href="#" onclick="shareToTwitter()" class="social-btn twitter">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </a>
+                        <a href="#" onclick="shareToWhatsApp()" class="social-btn whatsapp">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </a>
+                        <a href="#" onclick="shareToLinkedIn()" class="social-btn linkedin">
+                            <i class="fab fa-linkedin-in"></i> LinkedIn
+                        </a>
+                    </div>
+                    <p style="color: #666;">Suka dengan artikel ini? Jangan lupa untuk membagikannya ke teman-teman Anda!</p>
+                </div>
+            `;
+        }
+
+        function loadRelatedArticles() {
+            const relatedArticles = allArticles
+                .filter(article => article.id !== currentArticle.id && article.category === currentArticle.category)
+                .slice(0, 3);
+            
+            if (relatedArticles.length === 0) {
+                // If no articles in same category, show random articles
+                const randomArticles = allArticles
+                    .filter(article => article.id !== currentArticle.id)
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, 3);
+                displayRelatedArticles(randomArticles);
+            } else {
+                displayRelatedArticles(relatedArticles);
+            }
+        }
+
+        function displayRelatedArticles(articles) {
+            const container = document.getElementById('related-articles');
+            
+            container.innerHTML = articles.map(article => `
+                <div class="related-card">
+                    <img src="${article.image}" alt="${article.title}">
+                    <div class="related-card-content">
+                        <h4>${article.title}</h4>
+                        <p>${article.excerpt}</p>
+                        <a href="article-detail.html?id=${article.id}" class="btn btn-primary">
+                            Baca Artikel
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function shareToFacebook() {
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent(currentArticle.title);
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`, '_blank');
+        }
+
+        function shareToTwitter() {
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent(currentArticle.title);
+            window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`, '_blank');
+        }
+
+        function shareToWhatsApp() {
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent(currentArticle.title);
+            window.open(`https://wa.me/?text=${title} ${url}`, '_blank');
+        }
+
+        function shareToLinkedIn() {
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent(currentArticle.title);
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}`, '_blank');
+          '_blank';
+        }
+    </script>
+</body>
+</html>

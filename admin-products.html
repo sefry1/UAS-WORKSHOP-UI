@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Produk - FashionStore Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-container {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            background: #f5f6fa;
+        }
+        
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        
+        .admin-sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .admin-content {
+            margin-left: 250px;
+            padding: 2rem;
+            transition: margin-left 0.3s;
+        }
+        
+        .admin-content.full-width {
+            margin-left: 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #34495e;
+            color: white;
+        }
+        
+        .sidebar-menu i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-toggle {
+            display: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        
+        .products-filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .products-table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .products-table th,
+        .products-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .products-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+        
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .product-category {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .stock-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .stock-high { background: #d1ecf1; color: #0c5460; }
+        .stock-medium { background: #fff3cd; color: #856404; }
+        .stock-low { background: #f8d7da; color: #721c24; }
+        .stock-out { background: #e2e3e5; color: #383d41; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .image-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .image-upload:hover {
+            border-color: #e74c3c;
+            background: #fef5f5;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .pagination button.active {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar-toggle {
+                display: block;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .products-table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore Admin</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Lihat Website</a></li>
+                    <li><a href="admin-dashboard.html">Dashboard</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-products.html" class="active"><i class="fas fa-box"></i> Kelola Produk</a></li>
+                <li><a href="admin-articles.html"><i class="fas fa-newspaper"></i> Kelola Artikel</a></li>
+                <li><a href="admin-users.html"><i class="fas fa-users"></i> Kelola Pengguna</a></li>
+                <li><a href="admin-transactions.html"><i class="fas fa-receipt"></i> Kelola Transaksi</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Admin Content -->
+        <main class="admin-content" id="admin-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div style="display: flex; align-items: center;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 style="margin: 0;">Kelola Produk</h1>
+                </div>
+                <button class="btn btn-primary" onclick="openProductModal()">
+                    <i class="fas fa-plus"></i> Tambah Produk
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="products-filters">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="category-filter">Kategori</label>
+                        <select id="category-filter" class="form-control" onchange="filterProducts()">
+                            <option value="">Semua Kategori</option>
+                            <option value="kaos">Kaos</option>
+                            <option value="kemeja">Kemeja</option>
+                            <option value="celana">Celana</option>
+                            <option value="jaket">Jaket</option>
+                            <option value="dress">Dress</option>
+                            <option value="aksesoris">Aksesoris</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="stock-filter">Stok</label>
+                        <select id="stock-filter" class="form-control" onchange="filterProducts()">
+                            <option value="">Semua Stok</option>
+                            <option value="high">Stok Tinggi (>50)</option>
+                            <option value="medium">Stok Sedang (11-50)</option>
+                            <option value="low">Stok Rendah (1-10)</option>
+                            <option value="out">Habis (0)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sort-filter">Urutkan</label>
+                        <select id="sort-filter" class="form-control" onchange="filterProducts()">
+                            <option value="name">Nama A-Z</option>
+                            <option value="name-desc">Nama Z-A</option>
+                            <option value="price">Harga Terendah</option>
+                            <option value="price-desc">Harga Tertinggi</option>
+                            <option value="stock">Stok Terendah</option>
+                            <option value="stock-desc">Stok Tertinggi</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-products">Cari Produk</label>
+                        <input type="text" id="search-products" class="form-control" placeholder="Nama produk..." oninput="filterProducts()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Table -->
+            <div class="products-table-container">
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Gambar</th>
+                            <th>Produk</th>
+                            <th>Kategori</th>
+                            <th>Harga</th>
+                            <th>Stok</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-table-body">
+                        <!-- Products will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Tambah Produk</h3>
+                <button class="close" onclick="closeProductModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    
+                    <div class="form-group">
+                        <label for="product-name">Nama Produk *</label>
+                        <input type="text" id="product-name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-category">Kategori *</label>
+                            <select id="product-category" class="form-control" required>
+                                <option value="">Pilih Kategori</option>
+                                <option value="kaos">Kaos</option>
+                                <option value="kemeja">Kemeja</option>
+                                <option value="celana">Celana</option>
+                                <option value="jaket">Jaket</option>
+                                <option value="dress">Dress</option>
+                                <option value="aksesoris">Aksesoris</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-price">Harga *</label>
+                            <input type="number" id="product-price" class="form-control" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-stock">Stok *</label>
+                            <input type="number" id="product-stock" class="form-control" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-discount">Diskon (%)</label>
+                            <input type="number" id="product-discount" class="form-control" min="0" max="100" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-description">Deskripsi</label>
+                        <textarea id="product-description" class="form-control" rows="4"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Gambar Produk</label>
+                        <div class="image-upload" onclick="document.getElementById('product-image').click()">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #ccc; margin-bottom: 1rem;"></i>
+                            <p>Klik untuk upload gambar</p>
+                            <input type="file" id="product-image" accept="image/*" style="display: none;" onchange="previewImage(event)">
+                        </div>
+                        <img id="image-preview" class="image-preview" style="display: none;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Ukuran Tersedia</label>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="XS" class="size-checkbox"> XS
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="S" class="size-checkbox"> S
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="M" class="size-checkbox"> M
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="L" class="size-checkbox"> L
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="XL" class="size-checkbox"> XL
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="XXL" class="size-checkbox"> XXL
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Warna Tersedia</label>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="Hitam" class="color-checkbox"> Hitam
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="Putih" class="color-checkbox"> Putih
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="Merah" class="color-checkbox"> Merah
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="Biru" class="color-checkbox"> Biru
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="Hijau" class="color-checkbox"> Hijau
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" value="Abu-abu" class="color-checkbox"> Abu-abu
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeProductModal()">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="saveProduct()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let allProducts = [];
+        let filteredProducts = [];
+        let currentPage = 1;
+        const productsPerPage = 10;
+        let editingProductId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+        });
+
+        function loadProducts() {
+            allProducts = getProducts();
+            filteredProducts = [...allProducts];
+            displayProducts();
+        }
+
+        function displayProducts() {
+            const tbody = document.getElementById('products-table-body');
+            const startIndex = (currentPage - 1) * productsPerPage;
+            const endIndex = startIndex + productsPerPage;
+            const productsToShow = filteredProducts.slice(startIndex, endIndex);
+
+            if (productsToShow.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 3rem; color: #666;">
+                            <i class="fas fa-box" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                            Tidak ada produk ditemukan
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = productsToShow.map(product => `
+                <tr>
+                    <td>
+                        <img src="${product.image}" alt="${product.name}" class="product-image">
+                    </td>
+                    <td>
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-category">${product.category}</div>
+                    </td>
+                    <td>${product.category}</td>
+                    <td>
+                        <div>Rp ${product.price.toLocaleString()}</div>
+                        ${product.discount > 0 ? `<small style="color: #e74c3c;">Diskon ${product.discount}%</small>` : ''}
+                    </td>
+                    <td>
+                        <span class="stock-badge ${getStockClass(product.stock)}">
+                            ${product.stock} pcs
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge ${product.stock > 0 ? 'status-completed' : 'status-cancelled'}">
+                            ${product.stock > 0 ? 'Tersedia' : 'Habis'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon btn-edit" onclick="editProduct(${product.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteProduct(${product.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            displayPagination();
+        }
+
+        function getStockClass(stock) {
+            if (stock === 0) return 'stock-out';
+            if (stock <= 10) return 'stock-low';
+            if (stock <= 50) return 'stock-medium';
+            return 'stock-high';
+        }
+
+        function displayPagination() {
+            const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+            const container = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `<button onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += `<button disabled>...</button>`;
+                }
+            }
+
+            // Next button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            container.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayProducts();
+            }
+        }
+
+        function filterProducts() {
+            const categoryFilter = document.getElementById('category-filter').value;
+            const stockFilter = document.getElementById('stock-filter').value;
+            const sortFilter = document.getElementById('sort-filter').value;
+            const searchTerm = document.getElementById('search-products').value.toLowerCase();
+
+            // Filter products
+            filteredProducts = allProducts.filter(product => {
+                // Category filter
+                if (categoryFilter && product.category !== categoryFilter) {
+                    return false;
+                }
+
+                // Stock filter
+                if (stockFilter) {
+                    switch (stockFilter) {
+                        case 'high':
+                            if (product.stock <= 50) return false;
+                            break;
+                        case 'medium':
+                            if (product.stock < 11 || product.stock > 50) return false;
+                            break;
+                        case 'low':
+                            if (product.stock < 1 || product.stock > 10) return false;
+                            break;
+                        case 'out':
+                            if (product.stock !== 0) return false;
+                            break;
+                    }
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    const searchInName = product.name.toLowerCase().includes(searchTerm);
+                    const searchInCategory = product.category.toLowerCase().includes(searchTerm);
+                    if (!searchInName && !searchInCategory) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Sort products
+            filteredProducts.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'price':
+                        return a.price - b.price;
+                    case 'price-desc':
+                        return b.price - a.price;
+                    case 'stock':
+                        return a.stock - b.stock;
+                    case 'stock-desc':
+                        return b.stock - a.stock;
+                    default:
+                        return 0;
+                }
+            });
+
+            currentPage = 1;
+            displayProducts();
+        }
+
+        function openProductModal(productId = null) {
+            editingProductId = productId;
+            const modal = document.getElementById('product-modal');
+            const title = document.getElementById('modal-title');
+            
+            if (productId) {
+                title.textContent = 'Edit Produk';
+                loadProductData(productId);
+            } else {
+                title.textContent = 'Tambah Produk';
+                resetForm();
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').style.display = 'none';
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('product-form').reset();
+            document.getElementById('product-id').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            
+            // Reset checkboxes
+            document.querySelectorAll('.size-checkbox, .color-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            editingProductId = null;
+        }
+
+        function loadProductData(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('product-id').value = product.id;
+            document.getElementById('product-name').value = product.name;
+            document.getElementById('product-category').value = product.category;
+            document.getElementById('product-price').value = product.price;
+            document.getElementById('product-stock').value = product.stock;
+            document.getElementById('product-discount').value = product.discount || 0;
+            document.getElementById('product-description').value = product.description || '';
+
+            // Set image preview
+            if (product.image) {
+                const preview = document.getElementById('image-preview');
+                preview.src = product.image;
+                preview.style.display = 'block';
+            }
+
+            // Set sizes
+            if (product.sizes) {
+                product.sizes.forEach(size => {
+                    const checkbox = document.querySelector(`.size-checkbox[value="${size}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+
+            // Set colors
+            if (product.colors) {
+                product.colors.forEach(color => {
+                    const checkbox = document.querySelector(`.color-checkbox[value="${color}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('image-preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function saveProduct() {
+            const form = document.getElementById('product-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Get form data
+            const productData = {
+                name: document.getElementById('product-name').value,
+                category: document.getElementById('product-category').value,
+                price: parseInt(document.getElementById('product-price').value),
+                stock: parseInt(document.getElementById('product-stock').value),
+                discount: parseInt(document.getElementById('product-discount').value) || 0,
+                description: document.getElementById('product-description').value,
+                image: document.getElementById('image-preview').src || 'https://via.placeholder.com/300x300?text=No+Image',
+                sizes: Array.from(document.querySelectorAll('.size-checkbox:checked')).map(cb => cb.value),
+                colors: Array.from(document.querySelectorAll('.color-checkbox:checked')).map(cb => cb.value)
+            };
+
+            if (editingProductId) {
+                // Update existing product
+                updateProduct(editingProductId, productData);
+                alert('Produk berhasil diperbarui!');
+            } else {
+                // Add new product
+                addProduct(productData);
+                alert('Produk berhasil ditambahkan!');
+            }
+
+            closeProductModal();
+            loadProducts();
+        }
+
+        function editProduct(productId) {
+            openProductModal(productId);
+        }
+
+        function deleteProduct(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            if (confirm(`Apakah Anda yakin ingin menghapus produk "${product.name}"?`)) {
+                removeProduct(productId);
+                alert('Produk berhasil dihapus!');
+                loadProducts();
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const content = document.getElementById('admin-content');
+            
+            sidebar.classList.toggle('show');
+            content.classList.toggle('full-width');
+        }
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                alert('Logout berhasil!');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('product-modal');
+            if (event.target === modal) {
+                closeProductModal();
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('admin-sidebar');
+            const toggle = document.querySelector('.sidebar-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggle.contains(event.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

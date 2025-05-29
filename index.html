@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FashionStore - Toko Pakaian Online</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html" class="active">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html">Artikel</a></li>
+                    <li><a href="cart.html">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="wishlist.html">Wishlist <span id="wishlist-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html">Riwayat</a></li>
+                    <li id="auth-menu">
+                        <a href="login.html">Login</a>
+                    </li>
+                </ul>
+            </nav>  
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h2>Koleksi Fashion Terbaru</h2>
+            <p>Temukan gaya terbaik Anda dengan koleksi pakaian berkualitas tinggi</p>
+            <a href="catalog.html" class="btn btn-primary">Belanja Sekarang</a>
+        </div>
+        <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="Fashion Collection">
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured-products">
+        <div class="container">
+            <h2>Produk Unggulan</h2>
+            <div class="products-grid" id="featured-products">
+                <!-- Products will be loaded by JavaScript -->
+            </div>
+            <div class="text-center">
+                <a href="catalog.html" class="btn btn-outline">Lihat Semua Produk</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Latest Articles -->
+    <section class="latest-articles">
+        <div class="container">
+            <h2>Artikel Terbaru</h2>
+            <div class="articles-grid" id="latest-articles">
+                <!-- Articles will be loaded by JavaScript -->
+            </div>
+            <div class="text-center">
+                <a href="articles.html" class="btn btn-outline">Baca Semua Artikel</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko pakaian online terpercaya dengan koleksi fashion terbaru dan berkualitas.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="cart.html">Keranjang</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <p><i class="fas fa-envelope"></i> info@fashionstore.com</p>
+                    <p><i class="fas fa-phone"></i> +62 123 456 7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // Load featured products and articles on homepage
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFeaturedProducts();
+            loadLatestArticles();
+            updateCartCount();
+        });
+
+        function loadFeaturedProducts() {
+            const products = getProducts().slice(0, 4);
+            const container = document.getElementById('featured-products');
+            
+            container.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p class="price">Rp ${product.price.toLocaleString()}</p>
+                        <a href="product-detail.html?id=${product.id}" class="btn btn-primary">Lihat Detail</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadLatestArticles() {
+            const articles = getArticles().slice(0, 3);
+            const container = document.getElementById('latest-articles');
+            
+            container.innerHTML = articles.map(article => `
+                <div class="article-card">
+                    <img src="${article.image}" alt="${article.title}">
+                    <div class="article-info">
+                        <h3>${article.title}</h3>
+                        <p>${article.excerpt}</p>
+                        <a href="article-detail.html?id=${article.id}" class="btn btn-outline">Baca Selengkapnya</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wishlist - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .wishlist-container {
+            margin-top: 100px;
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .wishlist-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .wishlist-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .wishlist-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .wishlist-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .wishlist-count {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        
+        .wishlist-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .wishlist-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .wishlist-item-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .wishlist-item:hover .wishlist-item-image {
+            transform: scale(1.05);
+        }
+        
+        .remove-wishlist {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            opacity: 0;
+        }
+        
+        .wishlist-item:hover .remove-wishlist {
+            opacity: 1;
+        }
+        
+        .remove-wishlist:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+        
+        .stock-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .stock-available {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .stock-low {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .stock-out {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .wishlist-item-info {
+            padding: 1.5rem;
+        }
+        
+        .wishlist-item-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .wishlist-item-category {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .wishlist-item-price {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .current-price {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .original-price {
+            font-size: 1rem;
+            color: #999;
+            text-decoration: line-through;
+        }
+        
+        .discount-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .wishlist-item-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stars {
+            color: #f39c12;
+        }
+        
+        .rating-text {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .wishlist-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-add-cart {
+            flex: 1;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-add-cart:hover {
+            background: #c0392b;
+        }
+        
+        .btn-add-cart:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .btn-view {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-view:hover {
+            background: #2980b9;
+        }
+        
+        .empty-wishlist {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+        
+        .empty-wishlist i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+        
+        .empty-wishlist h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .empty-wishlist p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .wishlist-filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        @media (max-width: 768px) {
+            .wishlist-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+            
+            .wishlist-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html">Artikel</a></li>
+                    <li><a href="cart.html">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="wishlist.html" class="active">Wishlist <span id="wishlist-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html">Riwayat</a></li>
+                    <li id="auth-menu">
+                        <a href="login.html">Login</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="wishlist-container">
+        <div class="container">
+            <div class="wishlist-header">
+                <h1><i class="fas fa-heart"></i> Wishlist Saya</h1>
+                <p>Produk favorit yang ingin Anda beli</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="wishlist-filters">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="category-filter">Kategori</label>
+                        <select id="category-filter" class="form-control" onchange="filterWishlist()">
+                            <option value="">Semua Kategori</option>
+                            <option value="kaos">Kaos</option>
+                            <option value="kemeja">Kemeja</option>
+                            <option value="celana">Celana</option>
+                            <option value="jaket">Jaket</option>
+                            <option value="dress">Dress</option>
+                            <option value="aksesoris">Aksesoris</option>
+                            <option value="sepatu">Sepatu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="availability-filter">Ketersediaan</label>
+                        <select id="availability-filter" class="form-control" onchange="filterWishlist()">
+                            <option value="">Semua</option>
+                            <option value="available">Tersedia</option>
+                            <option value="low">Stok Terbatas</option>
+                            <option value="out">Habis</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sort-filter">Urutkan</label>
+                        <select id="sort-filter" class="form-control" onchange="filterWishlist()">
+                            <option value="newest">Terbaru Ditambahkan</option>
+                            <option value="oldest">Terlama Ditambahkan</option>
+                            <option value="price-low">Harga Terendah</option>
+                            <option value="price-high">Harga Tertinggi</option>
+                            <option value="name">Nama A-Z</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-wishlist">Cari Produk</label>
+                        <input type="text" id="search-wishlist" class="form-control" placeholder="Nama produk..." oninput="filterWishlist()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="wishlist-actions">
+                <div class="wishlist-count">
+                    <span id="total-wishlist-items">0</span> produk dalam wishlist
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-outline" onclick="clearWishlist()">
+                        <i class="fas fa-trash"></i> Kosongkan Wishlist
+                    </button>
+                    <button class="btn btn-primary" onclick="addAllToCart()">
+                        <i class="fas fa-cart-plus"></i> Tambah Semua ke Keranjang
+                    </button>
+                </div>
+            </div>
+
+            <div id="wishlist-content">
+                <!-- Wishlist items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko fashion online terpercaya dengan koleksi terlengkap dan kualitas terbaik.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="index.html">Beranda</a></li>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="history.html">Riwayat</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Layanan</h4>
+                    <ul>
+                        <li><a href="#">Bantuan</a></li>
+                        <li><a href="#">Pengiriman</a></li>
+                        <li><a href="#">Pengembalian</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +62 123 456 789</li>
+                        <li><i class="fas fa-envelope"></i> info@fashionstore.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let wishlistItems = [];
+        let filteredWishlistItems = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadWishlist();
+            updateAuthMenu();
+        });
+
+        function loadWishlist() {
+            wishlistItems = WishlistSystem.getWishlistItems();
+            filteredWishlistItems = [...wishlistItems];
+            displayWishlist();
+            updateWishlistCount();
+        }
+
+        function displayWishlist() {
+            const container = document.getElementById('wishlist-content');
+            const totalItems = document.getElementById('total-wishlist-items');
+            
+            totalItems.textContent = filteredWishlistItems.length;
+
+            if (filteredWishlistItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-wishlist">
+                        <i class="fas fa-heart-broken"></i>
+                        <h3>Wishlist Anda Kosong</h3>
+                        <p>Belum ada produk yang ditambahkan ke wishlist</p>
+                        <a href="catalog.html" class="btn btn-primary">Jelajahi Produk</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const wishlistHTML = `
+                <div class="wishlist-grid">
+                    ${filteredWishlistItems.map(item => createWishlistItemHTML(item)).join('')}
+                </div>
+            `;
+
+            container.innerHTML = wishlistHTML;
+        }
+
+        function createWishlistItemHTML(item) {
+            const stockStatus = getStockStatus(item.stock);
+            const hasDiscount = item.discount > 0;
+
+            return `
+                <div class="wishlist-item">
+                    <img src="${item.image}" alt="${item.name}" class="wishlist-item-image">
+                    <button class="remove-wishlist" onclick="removeFromWishlist(${item.id})" title="Hapus dari wishlist">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="stock-badge stock-${stockStatus.class}">
+                        ${stockStatus.text}
+                    </div>
+                    ${hasDiscount ? `<div class="discount-badge">-${item.discount}%</div>` : ''}
+                    
+                    <div class="wishlist-item-info">
+                        <h3 class="wishlist-item-name">${item.name}</h3>
+                        <p class="wishlist-item-category">${item.category}</p>
+                        
+                        <div class="wishlist-item-price">
+                            <span class="current-price">Rp ${item.price.toLocaleString()}</span>
+                            ${item.originalPrice ? `<span class="original-price">Rp ${item.originalPrice.toLocaleString()}</span>` : ''}
+                        </div>
+                        
+                        <div class="wishlist-item-rating">
+                            <div class="stars">
+                                ${generateStars(item.rating)}
+                            </div>
+                            <span class="rating-text">(${item.reviews} reviews)</span>
+                        </div>
+                        
+                        <div class="wishlist-item-actions">
+                            <button class="btn-add-cart" onclick="addToCartFromWishlist(${item.id})" ${item.stock === 0 ? 'disabled' : ''}>
+                                <i class="fas fa-cart-plus"></i> 
+                                ${item.stock === 0 ? 'Habis' : 'Tambah ke Keranjang'}
+                            </button>
+                            <button class="btn-view" onclick="quickView(${item.id})" title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getStockStatus(stock) {
+            if (stock === 0) return { class: 'out', text: 'Habis' };
+            if (stock <= 5) return { class: 'low', text: 'Terbatas' };
+            return { class: 'available', text: 'Tersedia' };
+        }
+
+        function generateStars(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+            
+            let stars = '';
+            
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star"></i>';
+            }
+            
+            if (hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star"></i>';
+            }
+            
+            return stars;
+        }
+
+        function filterWishlist() {
+            const categoryFilter = document.getElementById('category-filter').value;
+            const availabilityFilter = document.getElementById('availability-filter').value;
+            const sortFilter = document.getElementById('sort-filter').value;
+            const searchTerm = document.getElementById('search-wishlist').value.toLowerCase();
+
+            // Filter items
+            filteredWishlistItems = wishlistItems.filter(item => {
+                // Category filter
+                if (categoryFilter && item.category !== categoryFilter) {
+                    return false;
+                }
+
+                // Availability filter
+                if (availabilityFilter) {
+                    if (availabilityFilter === 'available' && item.stock === 0) return false;
+                    if (availabilityFilter === 'low' && (item.stock === 0 || item.stock > 5)) return false;
+                    if (availabilityFilter === 'out' && item.stock !== 0) return false;
+                }
+
+                // Search filter
+                if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) {
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Sort items
+            filteredWishlistItems.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'newest':
+                        return new Date(b.addedDate) - new Date(a.addedDate);
+                    case 'oldest':
+                        return new Date(a.addedDate) - new Date(b.addedDate);
+                    case 'price-low':
+                        return a.price - b.price;
+                    case 'price-high':
+                        return b.price - a.price;
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    default:
+                        return 0;
+                }
+            });
+
+            displayWishlist();
+        }
+
+        function removeFromWishlist(productId) {
+            if (confirm('Hapus produk ini dari wishlist?')) {
+                WishlistSystem.removeFromWishlist(productId);
+                loadWishlist();
+                showNotification('Produk dihapus dari wishlist!', 'success');
+            }
+        }
+
+        function addToCartFromWishlist(productId) {
+            const product = FashionStore.getProduct(productId);
+            if (!product) return;
+
+            if (product.stock === 0) {
+                showNotification('Produk sedang habis!', 'error');
+                return;
+            }
+
+            FashionStore.addToCart(productId);
+            showNotification('Produk ditambahkan ke keranjang!', 'success');
+        }
+
+        function clearWishlist() {
+            if (confirm('Hapus semua produk dari wishlist?')) {
+                WishlistSystem.clearWishlist();
+                loadWishlist();
+                showNotification('Wishlist dikosongkan!', 'success');
+            }
+        }
+
+        function addAllToCart() {
+            const availableItems = filteredWishlistItems.filter(item => item.stock > 0);
+            
+            if (availableItems.length === 0) {
+                showNotification('Tidak ada produk yang tersedia untuk ditambahkan ke keranjang!', 'error');
+                return;
+            }
+
+            availableItems.forEach(item => {
+                FashionStore.addToCart(item.id);
+            });
+
+            showNotification(`${availableItems.length} produk ditambahkan ke keranjang!`, 'success');
+        }
+
+        function updateWishlistCount() {
+            const wishlistCountElements = document.querySelectorAll('#wishlist-count');
+            const totalItems = WishlistSystem.getWishlistCount();
+            
+            wishlistCountElements.forEach(element => {
+                element.textContent = totalItems;
+                element.style.display = totalItems > 0 ? 'inline' : 'none';
+            });
+        }
+
+        function updateAuthMenu() {
+            const authMenu = document.getElementById('auth-menu');
+            const currentUser = AuthSystem.getCurrentUser();
+            
+            if (currentUser) {
+                authMenu.innerHTML = `
+                    <div class="user-menu">
+                        <span>Halo, ${currentUser.firstName}!</span>
+                        <a href="#" onclick="AuthSystem.logout()">Logout</a>
+                    </div>
+                `;
+            }
+        }
+
+        function quickView(productId) {
+            // This function is defined in script.js
+            if (typeof window.quickView === 'function') {
+                window.quickView(productId);
+            }
+        }
+
+        function showNotification(message, type) {
+            // This function is defined in script.js
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(message, type);
+            }
+        }
+    </script>
+</body>
+</html>

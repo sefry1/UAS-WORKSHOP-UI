@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keranjang Belanja - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html">Artikel</a></li>
+                    <li><a href="cart.html" class="active">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html">Riwayat</a></li>
+                    <li><a href="admin-dashboard.html" class="admin-link">Admin</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main style="margin-top: 100px; padding: 2rem 0; min-height: 70vh;">
+        <div class="container">
+            <h1>Keranjang Belanja</h1>
+            
+            <div id="cart-content">
+                <!-- Cart content will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko pakaian online terpercaya dengan koleksi fashion terbaru dan berkualitas.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="cart.html">Keranjang</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <p><i class="fas fa-envelope"></i> info@fashionstore.com</p>
+                    <p><i class="fas fa-phone"></i> +62 123 456 7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let selectedItems = new Set();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCart();
+            updateCartCount();
+        });
+
+        function loadCart() {
+            const cartContent = document.getElementById('cart-content');
+            
+            if (cart.length === 0) {
+                cartContent.innerHTML = `
+                    <div style="text-align: center; padding: 3rem;">
+                        <i class="fas fa-shopping-cart" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+                        <h2>Keranjang Anda Kosong</h2>
+                        <p>Belum ada produk yang ditambahkan ke keranjang.</p>
+                        <a href="catalog.html" class="btn btn-primary">Mulai Belanja</a>
+                    </div>
+                `;
+                return;
+            }
+
+            cartContent.innerHTML = `
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                    <div class="cart-items">
+                        <div style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                <input type="checkbox" id="select-all" onchange="toggleSelectAll()" style="transform: scale(1.2);">
+                                <label for="select-all" style="font-weight: 500;">Pilih Semua</label>
+                                <button onclick="deleteSelected()" class="btn btn-danger" style="margin-left: auto; padding: 8px 16px;">
+                                    <i class="fas fa-trash"></i> Hapus Terpilih
+                                </button>
+                            </div>
+                        </div>
+                        
+                        ${cart.map(item => `
+                            <div class="cart-item" id="cart-item-${item.id}">
+                                <input type="checkbox" class="item-checkbox" data-item-id="${item.id}" 
+                                       onchange="updateSelection()" style="transform: scale(1.2);">
+                                <img src="${item.image}" alt="${item.name}">
+                                <div class="cart-item-info">
+                                    <h4>${item.name}</h4>
+                                    <p style="color: #666; margin-bottom: 0.5rem;">
+                                        Ukuran: ${item.size} | Warna: ${item.color}
+                                    </p>
+                                    <p class="price">Rp ${item.price.toLocaleString()}</p>
+                                </div>
+                                <div class="cart-item-controls">
+                                    <div class="quantity-controls">
+                                        <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" class="quantity-btn">-</button>
+                                        <span class="quantity-display">${item.quantity}</span>
+                                        <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" class="quantity-btn">+</button>
+                                    </div>
+                                    <p style="font-weight: bold; color: #e74c3c; margin: 0 1rem;">
+                                        Rp ${(item.price * item.quantity).toLocaleString()}
+                                    </p>
+                                    <button onclick="removeItem(${item.id})" class="btn btn-danger" style="padding: 8px;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="cart-summary">
+                        <div style="background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 120px;">
+                            <h3 style="margin-bottom: 1.5rem; color: #333;">Ringkasan Pesanan</h3>
+                            
+                            <div id="summary-details">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Item terpilih:</span>
+                                    <span id="selected-count">0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                    <span>Subtotal:</span>
+                                    <span id="subtotal">Rp 0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                    <span>Ongkos Kirim:</span>
+                                    <span id="shipping-cost">Rp 15.000</span>
+                                </div>
+                                <hr style="margin: 1rem 0;">
+                                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: #e74c3c;">
+                                    <span>Total:</span>
+                                    <span id="total">Rp 15.000</span>
+                                </div>
+                            </div>
+                            
+                            <button onclick="proceedToCheckout()" id="checkout-btn" class="btn btn-primary w-100" 
+                                    style="margin-top: 2rem;" disabled>
+                                <i class="fas fa-credit-card"></i> Lanjut ke Pembayaran
+                            </button>
+                            
+                            <div style="margin-top: 1rem; text-align: center;">
+                                <a href="catalog.html" style="color: #e74c3c; text-decoration: none;">
+                                    <i class="fas fa-arrow-left"></i> Lanjut Belanja
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            updateSummary();
+        }
+
+        function updateQuantity(itemId, newQuantity) {
+            updateCartQuantity(itemId, newQuantity);
+            loadCart();
+        }
+
+        function removeItem(itemId) {
+            if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+                removeFromCart(itemId);
+                selectedItems.delete(itemId);
+                loadCart();
+            }
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('select-all');
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+                const itemId = parseInt(checkbox.dataset.itemId);
+                if (selectAll.checked) {
+                    selectedItems.add(itemId);
+                } else {
+                    selectedItems.delete(itemId);
+                }
+            });
+            
+            updateSummary();
+        }
+
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.item-checkbox');
+            const selectAll = document.getElementById('select-all');
+            
+            selectedItems.clear();
+            let allChecked = true;
+            
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedItems.add(parseInt(checkbox.dataset.itemId));
+                } else {
+                    allChecked = false;
+                }
+            });
+            
+            selectAll.checked = allChecked && checkboxes.length > 0;
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const selectedCount = selectedItems.size;
+            const subtotal = cart
+                .filter(item => selectedItems.has(item.id))
+                .reduce((total, item) => total + (item.price * item.quantity), 0);
+            
+            const shippingCost = selectedCount > 0 ? 15000 : 0;
+            const total = subtotal + shippingCost;
+            
+            document.getElementById('selected-count').textContent = selectedCount;
+            document.getElementById('subtotal').textContent = `Rp ${subtotal.toLocaleString()}`;
+            document.getElementById('shipping-cost').textContent = `Rp ${shippingCost.toLocaleString()}`;
+            document.getElementById('total').textContent = `Rp ${total.toLocaleString()}`;
+            
+            const checkoutBtn = document.getElementById('checkout-btn');
+            checkoutBtn.disabled = selectedCount === 0;
+            checkoutBtn.style.opacity = selectedCount === 0 ? '0.5' : '1';
+        }
+
+        function deleteSelected() {
+            if (selectedItems.size === 0) {
+                alert('Pilih item yang ingin dihapus terlebih dahulu.');
+                return;
+            }
+            
+            if (confirm(`Apakah Anda yakin ingin menghapus ${selectedItems.size} item terpilih?`)) {
+                selectedItems.forEach(itemId => {
+                    removeFromCart(itemId);
+                });
+                selectedItems.clear();
+                loadCart();
+            }
+        }
+
+        function proceedToCheckout() {
+            if (selectedItems.size === 0) {
+                alert('Pilih item yang ingin dibeli terlebih dahulu.');
+                return;
+            }
+            
+            // Store selected items for checkout
+            const selectedCartItems = cart.filter(item => selectedItems.has(item.id));
+            localStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
+            
+            window.location.href = 'checkout.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Transaksi - FashionStore Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-container {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            background: #f5f6fa;
+        }
+        
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        
+        .admin-sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .admin-content {
+            margin-left: 250px;
+            padding: 2rem;
+            transition: margin-left 0.3s;
+        }
+        
+        .admin-content.full-width {
+            margin-left: 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #34495e;
+            color: white;
+        }
+        
+        .sidebar-menu i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-toggle {
+            display: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .transactions-filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .transactions-table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .transactions-table th,
+        .transactions-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .transactions-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+        
+        .transaction-id {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .customer-info h5 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .customer-info p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-processing { background: #cce5ff; color: #004085; }
+        .status-completed { background: #d1ecf1; color: #0c5460; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .btn-view {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background: #2980b9;
+        }
+        
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #e67e22;
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .transaction-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .detail-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .detail-section h4 {
+            margin: 0 0 1rem 0;
+            color: #333;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 0.5rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        .items-list {
+            grid-column: 1 / -1;
+        }
+        
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            background: white;
+        }
+        
+        .item-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .item-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .item-details h5 {
+            margin: 0 0 0.25rem 0;
+            color: #333;
+        }
+        
+        .item-details p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .item-price {
+            text-align: right;
+        }
+        
+        .item-price .price {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 1.1rem;
+        }
+        
+        .item-price .quantity {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .pagination button.active {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar-toggle {
+                display: block;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .transactions-table-container {
+                overflow-x: auto;
+            }
+            
+            .transaction-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore Admin</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Lihat Website</a></li>
+                    <li><a href="admin-dashboard.html">Dashboard</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-products.html"><i class="fas fa-box"></i> Kelola Produk</a></li>
+                <li><a href="admin-articles.html"><i class="fas fa-newspaper"></i> Kelola Artikel</a></li>
+                <li><a href="admin-users.html"><i class="fas fa-users"></i> Kelola Pengguna</a></li>
+                <li><a href="admin-transactions.html" class="active"><i class="fas fa-receipt"></i> Kelola Transaksi</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Admin Content -->
+        <main class="admin-content" id="admin-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div style="display: flex; align-items: center;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 style="margin: 0;">Kelola Transaksi</h1>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-outline" onclick="exportTransactions()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-primary" onclick="refreshTransactions()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-transactions">0</div>
+                    <div class="stat-label">Total Transaksi</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pending-transactions">0</div>
+                    <div class="stat-label">Menunggu Pembayaran</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completed-transactions">0</div>
+                    <div class="stat-label">Transaksi Selesai</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-revenue">Rp 0</div>
+                    <div class="stat-label">Total Pendapatan</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="transactions-filters">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="status-filter">Status</label>
+                        <select id="status-filter" class="form-control" onchange="filterTransactions()">
+                            <option value="">Semua Status</option>
+                            <option value="pending">Menunggu Pembayaran</option>
+                            <option value="processing">Diproses</option>
+                            <option value="completed">Selesai</option>
+                            <option value="cancelled">Dibatalkan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date-from">Dari Tanggal</label>
+                        <input type="date" id="date-from" class="form-control" onchange="filterTransactions()">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-to">Sampai Tanggal</label>
+                        <input type="date" id="date-to" class="form-control" onchange="filterTransactions()">
+                    </div>
+                    <div class="form-group">
+                        <label for="sort-filter">Urutkan</label>
+                        <select id="sort-filter" class="form-control" onchange="filterTransactions()">
+                            <option value="newest">Terbaru</option>
+                            <option value="oldest">Terlama</option>
+                            <option value="amount-high">Nilai Tertinggi</option>
+                            <option value="amount-low">Nilai Terendah</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-transactions">Cari Transaksi</label>
+                        <input type="text" id="search-transactions" class="form-control" placeholder="ID atau nama pelanggan..." oninput="filterTransactions()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="transactions-table-container">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>ID Transaksi</th>
+                            <th>Pelanggan</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Tanggal</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-table-body">
+                        <!-- Transactions will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Transaction Detail Modal -->
+    <div id="transaction-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Detail Transaksi</h3>
+                <button class="close" onclick="closeTransactionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="transaction-detail-content">
+                    <!-- Transaction details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeTransactionModal()">Tutup</button>
+                <button type="button" class="btn btn-primary" id="update-status-btn" onclick="updateTransactionStatus()">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Update Modal -->
+    <div id="status-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Update Status Transaksi</h3>
+                <button class="close" onclick="closeStatusModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-status">Status Baru</label>
+                    <select id="new-status" class="form-control">
+                        <option value="pending">Menunggu Pembayaran</option>
+                        <option value="processing">Diproses</option>
+                        <option value="completed">Selesai</option>
+                        <option value="cancelled">Dibatalkan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status-note">Catatan (Opsional)</label>
+                    <textarea id="status-note" class="form-control" rows="3" placeholder="Tambahkan catatan untuk perubahan status..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeStatusModal()">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="confirmStatusUpdate()">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let allTransactions = [];
+        let filteredTransactions = [];
+        let currentPage = 1;
+        let currentTransactionId = null;
+        const transactionsPerPage = 10;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTransactions();
+            updateStats();
+            setDefaultDates();
+        });
+
+        function setDefaultDates() {
+            const today = new Date();
+            const oneMonthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+            
+            document.getElementById('date-from').value = oneMonthAgo.toISOString().split('T')[0];
+            document.getElementById('date-to').value = today.toISOString().split('T')[0];
+        }
+
+        function loadTransactions() {
+            allTransactions = getTransactions();
+            filteredTransactions = [...allTransactions];
+            displayTransactions();
+        }
+
+        function updateStats() {
+            const totalTransactions = allTransactions.length;
+            const pendingTransactions = allTransactions.filter(t => t.status === 'pending').length;
+            const completedTransactions = allTransactions.filter(t => t.status === 'completed').length;
+            const totalRevenue = allTransactions
+                .filter(t => t.status === 'completed')
+                .reduce((sum, t) => sum + t.total, 0);
+
+            document.getElementById('total-transactions').textContent = totalTransactions;
+            document.getElementById('pending-transactions').textContent = pendingTransactions;
+            document.getElementById('completed-transactions').textContent = completedTransactions;
+            document.getElementById('total-revenue').textContent = `Rp ${totalRevenue.toLocaleString()}`;
+        }
+
+        function displayTransactions() {
+            const tbody = document.getElementById('transactions-table-body');
+            const startIndex = (currentPage - 1) * transactionsPerPage;
+            const endIndex = startIndex + transactionsPerPage;
+            const transactionsToShow = filteredTransactions.slice(startIndex, endIndex);
+
+            if (transactionsToShow.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 3rem; color: #666;">
+                            <i class="fas fa-receipt" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                            Tidak ada transaksi ditemukan
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = transactionsToShow.map(transaction => `
+                <tr>
+                    <td>
+                        <span class="transaction-id">#${transaction.id}</span>
+                    </td>
+                    <td>
+                        <div class="customer-info">
+                            <h5>${transaction.shipping?.address?.firstName || 'N/A'} ${transaction.shipping?.address?.lastName || ''}</h5>
+                            <p>${transaction.shipping?.address?.email || 'Tidak ada email'}</p>
+                        </div>
+                    </td>
+                    <td>
+                        <strong>Rp ${transaction.total.toLocaleString()}</strong>
+                        <br>
+                        <small>${transaction.items.length} item(s)</small>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${transaction.status}">
+                            ${getStatusText(transaction.status)}
+                        </span>
+                    </td>
+                    <td>${formatDate(transaction.date)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon btn-view" onclick="viewTransaction(${transaction.id})" title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon btn-edit" onclick="openStatusModal(${transaction.id})" title="Update Status">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteTransaction(${transaction.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            displayPagination();
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Menunggu Pembayaran',
+                'processing': 'Diproses',
+                'completed': 'Selesai',
+                'cancelled': 'Dibatalkan'
+            };
+            return statusMap[status] || status;
+        }
+
+        function displayPagination() {
+            const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+            const container = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `<button onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += `<button disabled>...</button>`;
+                }
+            }
+
+            // Next button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            container.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayTransactions();
+            }
+        }
+
+        function filterTransactions() {
+            const statusFilter = document.getElementById('status-filter').value;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+            const sortFilter = document.getElementById('sort-filter').value;
+            const searchTerm = document.getElementById('search-transactions').value.toLowerCase();
+
+            // Filter transactions
+            filteredTransactions = allTransactions.filter(transaction => {
+                // Status filter
+                if (statusFilter && transaction.status !== statusFilter) {
+                    return false;
+                }
+
+                // Date filter
+                const transactionDate = new Date(transaction.date);
+                if (dateFrom && transactionDate < new Date(dateFrom)) {
+                    return false;
+                }
+                if (dateTo && transactionDate > new Date(dateTo + 'T23:59:59')) {
+                    return false;
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    const searchInId = transaction.id.toString().includes(searchTerm);
+                    const searchInCustomer = `${transaction.shipping?.address?.firstName || ''} ${transaction.shipping?.address?.lastName || ''}`.toLowerCase().includes(searchTerm);
+                    const searchInEmail = (transaction.shipping?.address?.email || '').toLowerCase().includes(searchTerm);
+                    if (!searchInId && !searchInCustomer && !searchInEmail) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Sort transactions
+            filteredTransactions.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'newest':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'oldest':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'amount-high':
+                        return b.total - a.total;
+                    case 'amount-low':
+                        return a.total - b.total;
+                    default:
+                        return 0;
+                }
+            });
+
+            currentPage = 1;
+            displayTransactions();
+        }
+
+        function viewTransaction(transactionId) {
+            const transaction = allTransactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+
+            currentTransactionId = transactionId;
+            
+            const content = document.getElementById('transaction-detail-content');
+            content.innerHTML = `
+                <div class="transaction-details">
+                    <div class="detail-section">
+                        <h4>Informasi Transaksi</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">ID Transaksi:</span>
+                            <span class="detail-value">#${transaction.id}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tanggal:</span>
+                            <span class="detail-value">${formatDate(transaction.date)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">
+                                <span class="status-badge status-${transaction.status}">
+                                    ${getStatusText(transaction.status)}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total:</span>
+                            <span class="detail-value"><strong>Rp ${transaction.total.toLocaleString()}</strong></span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>Informasi Pengiriman</h4>
+                        <div class="detail-item">
+                            <span class="detail-label">Nama:</span>
+                            <span class="detail-value">${transaction.shipping?.address?.firstName || 'N/A'} ${transaction.shipping?.address?.lastName || ''}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email:</span>
+                            <span class="detail-value">${transaction.shipping?.address?.email || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Telepon:</span>
+                            <span class="detail-value">${transaction.shipping?.address?.phone || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Alamat:</span>
+                            <span class="detail-value">${transaction.shipping?.address?.address || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Kota:</span>
+                            <span class="detail-value">${transaction.shipping?.address?.city || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Metode Pengiriman:</span>
+                            <span class="detail-value">${transaction.shipping?.method || 'N/A'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section items-list">
+                        <h4>Item yang Dibeli</h4>
+                        ${transaction.items.map(item => `
+                            <div class="item-row">
+                                <div class="item-info">
+                                    <img src="${item.image}" alt="${item.name}" class="item-image">
+                                    <div class="item-details">
+                                        <h5>${item.name}</h5>
+                                        <p>Ukuran: ${item.size} | Warna: ${item.color}</p>
+                                    </div>
+                                </div>
+                                <div class="item-price">
+                                    <div class="price">Rp ${item.price.toLocaleString()}</div>
+                                    <div class="quantity">Qty: ${item.quantity}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-title').textContent = `Detail Transaksi #${transaction.id}`;
+            document.getElementById('transaction-modal').style.display = 'block';
+        }
+
+        function closeTransactionModal() {
+            document.getElementById('transaction-modal').style.display = 'none';
+            currentTransactionId = null;
+        }
+
+        function openStatusModal(transactionId) {
+            const transaction = allTransactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+
+            currentTransactionId = transactionId;
+            document.getElementById('new-status').value = transaction.status;
+            document.getElementById('status-note').value = '';
+            document.getElementById('status-modal').style.display = 'block';
+        }
+
+        function closeStatusModal() {
+            document.getElementById('status-modal').style.display = 'none';
+            currentTransactionId = null;
+        }
+
+        function updateTransactionStatus() {
+            if (!currentTransactionId) return;
+            openStatusModal(currentTransactionId);
+        }
+
+        function confirmStatusUpdate() {
+            if (!currentTransactionId) return;
+
+            const newStatus = document.getElementById('new-status').value;
+            const note = document.getElementById('status-note').value;
+
+            const transaction = allTransactions.find(t => t.id === currentTransactionId);
+            if (!transaction) return;
+
+            const oldStatus = transaction.status;
+            transaction.status = newStatus;
+
+            // Update localStorage
+            localStorage.setItem('transactions', JSON.stringify(allTransactions));
+
+            alert(`Status transaksi #${transaction.id} berhasil diubah dari "${getStatusText(oldStatus)}" ke "${getStatusText(newStatus)}"`);
+
+            closeStatusModal();
+            loadTransactions();
+            updateStats();
+        }
+
+        function deleteTransaction(transactionId) {
+            const transaction = allTransactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+
+            if (confirm(`Apakah Anda yakin ingin menghapus transaksi #${transaction.id}?\n\nTindakan ini tidak dapat dibatalkan!`)) {
+                allTransactions = allTransactions.filter(t => t.id !== transactionId);
+                
+                // Update localStorage
+                localStorage.setItem('transactions', JSON.stringify(allTransactions));
+                
+                alert('Transaksi berhasil dihapus!');
+                loadTransactions();
+                updateStats();
+            }
+        }
+
+        function refreshTransactions() {
+            loadTransactions();
+            updateStats();
+            alert('Data transaksi berhasil diperbarui!');
+        }
+
+        function exportTransactions() {
+            // Simple CSV export
+            const csvContent = [
+                ['ID', 'Pelanggan', 'Email', 'Total', 'Status', 'Tanggal'].join(','),
+                ...filteredTransactions.map(t => [
+                    t.id,
+                    `"${t.shipping?.address?.firstName || ''} ${t.shipping?.address?.lastName || ''}"`,
+                    t.shipping?.address?.email || '',
+                    t.total,
+                    getStatusText(t.status),
+                    formatDate(t.date)
+                ].join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transaksi_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const content = document.getElementById('admin-content');
+            
+            sidebar.classList.toggle('show');
+            content.classList.toggle('full-width');
+        }
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                alert('Logout berhasil!');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const transactionModal = document.getElementById('transaction-modal');
+            const statusModal = document.getElementById('status-modal');
+            
+            if (event.target === transactionModal) {
+                closeTransactionModal();
+            }
+            if (event.target === statusModal) {
+                closeStatusModal();
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('admin-sidebar');
+            const toggle = document.querySelector('.sidebar-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggle.contains(event.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

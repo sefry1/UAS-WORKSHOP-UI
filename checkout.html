@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .checkout-container {
+            margin-top: 100px;
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 3rem;
+        }
+        
+        .checkout-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .checkout-summary {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+        
+        .section-title {
+            color: #333;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e74c3c;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #eee;
+            border-radius: 10px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .shipping-options {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .shipping-option {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .shipping-option:hover,
+        .shipping-option.selected {
+            border-color: #e74c3c;
+            background: #fef5f5;
+        }
+        
+        .shipping-option input[type="radio"] {
+            display: none;
+        }
+        
+        .shipping-info h4 {
+            margin: 0 0 0.25rem 0;
+            color: #333;
+        }
+        
+        .shipping-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .shipping-price {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .payment-method {
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .payment-method:hover,
+        .payment-method.selected {
+            border-color: #e74c3c;
+            background: #fef5f5;
+        }
+        
+        .payment-method input[type="radio"] {
+            display: none;
+        }
+        
+        .payment-method i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #e74c3c;
+        }
+        
+        .payment-method h5 {
+            margin: 0;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        
+        .checkout-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .checkout-item:last-child {
+            border-bottom: none;
+        }
+        
+        .checkout-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .item-details {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .item-price {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .summary-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #e74c3c;
+            padding-top: 1rem;
+            border-top: 2px solid #e74c3c;
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+        
+        .checkout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+        
+        .checkout-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .security-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .security-info i {
+            color: #27ae60;
+            margin-right: 0.5rem;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+        
+        .empty-cart i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+        
+        .empty-cart h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        
+        .empty-cart p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-radius: 20px;
+            margin: 0 0.5rem;
+            color: #666;
+        }
+        
+        .step.active {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .step.completed {
+            background: #27ae60;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .checkout-summary {
+                position: static;
+                order: -1;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+            
+            .progress-steps {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .step {
+                margin: 0.25rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html">Artikel</a></li>
+                    <li><a href="cart.html">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="wishlist.html">Wishlist <span id="wishlist-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html">Riwayat</a></li>
+                    <li id="auth-menu">
+                        <a href="login.html">Login</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="checkout-container">
+        <div class="container">
+            <!-- Progress Steps -->
+            <div class="progress-steps">
+                <div class="step completed">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Keranjang</span>
+                </div>
+                <div class="step active">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Checkout</span>
+                </div>
+                <div class="step">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Selesai</span>
+                </div>
+            </div>
+
+            <div id="checkout-content">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko fashion online terpercaya dengan koleksi terlengkap dan kualitas terbaik.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="index.html">Beranda</a></li>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="history.html">Riwayat</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Layanan</h4>
+                    <ul>
+                        <li><a href="#">Bantuan</a></li>
+                        <li><a href="#">Pengiriman</a></li>
+                        <li><a href="#">Pengembalian</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +62 123 456 789</li>
+                        <li><i class="fas fa-envelope"></i> info@fashionstore.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCheckoutPage();
+            updateAuthMenu();
+        });
+
+        function loadCheckoutPage() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const container = document.getElementById('checkout-content');
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3>Keranjang Anda Kosong</h3>
+                        <p>Tambahkan produk ke keranjang sebelum melakukan checkout</p>
+                        <a href="catalog.html" class="btn btn-primary">Mulai Berbelanja</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="checkout-grid">
+                    <!-- Checkout Form -->
+                    <div class="checkout-form">
+                        <form id="checkout-form">
+                            <!-- Shipping Information -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    Informasi Pengiriman
+                                </h3>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="firstName">Nama Depan *</label>
+                                        <input type="text" id="firstName" name="firstName" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="lastName">Nama Belakang *</label>
+                                        <input type="text" id="lastName" name="lastName" class="form-control" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email">Email *</label>
+                                    <input type="email" id="email" name="email" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="phone">Nomor Telepon *</label>
+                                    <input type="tel" id="phone" name="phone" class="form-control" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="address">Alamat Lengkap *</label>
+                                    <textarea id="address" name="address" class="form-control" rows="3" required placeholder="Jalan, Nomor Rumah, RT/RW"></textarea>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="city">Kota *</label>
+                                        <input type="text" id="city" name="city" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="postalCode">Kode Pos *</label>
+                                        <input type="text" id="postalCode" name="postalCode" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Shipping Method -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-truck"></i>
+                                    Metode Pengiriman
+                                </h3>
+                                
+                                <div class="shipping-options">
+                                    <label class="shipping-option selected" onclick="selectShipping(this, 'regular', 15000)">
+                                        <input type="radio" name="shipping" value="regular" checked>
+                                        <div class="shipping-info">
+                                            <h4>Pengiriman Regular</h4>
+                                            <p>3-5 hari kerja</p>
+                                        </div>
+                                        <div class="shipping-price">Rp 15.000</div>
+                                    </label>
+                                    
+                                    <label class="shipping-option" onclick="selectShipping(this, 'express', 25000)">
+                                        <input type="radio" name="shipping" value="express">
+                                        <div class="shipping-info">
+                                            <h4>Pengiriman Express</h4>
+                                            <p>1-2 hari kerja</p>
+                                        </div>
+                                        <div class="shipping-price">Rp 25.000</div>
+                                    </label>
+                                    
+                                    <label class="shipping-option" onclick="selectShipping(this, 'same-day', 50000)">
+                                        <input type="radio" name="shipping" value="same-day">
+                                        <div class="shipping-info">
+                                            <h4>Same Day Delivery</h4>
+                                            <p>Hari yang sama (Jakarta only)</p>
+                                        </div>
+                                        <div class="shipping-price">Rp 50.000</div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Payment Method -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-credit-card"></i>
+                                    Metode Pembayaran
+                                </h3>
+                                
+                                <div class="payment-methods">
+                                    <label class="payment-method selected" onclick="selectPayment(this, 'transfer')">
+                                        <input type="radio" name="payment" value="transfer" checked>
+                                        <i class="fas fa-university"></i>
+                                        <h5>Transfer Bank</h5>
+                                    </label>
+                                    
+                                    <label class="payment-method" onclick="selectPayment(this, 'credit-card')">
+                                        <input type="radio" name="payment" value="credit-card">
+                                        <i class="fas fa-credit-card"></i>
+                                        <h5>Kartu Kredit</h5>
+                                    </label>
+                                    
+                                    <label class="payment-method" onclick="selectPayment(this, 'e-wallet')">
+                                        <input type="radio" name="payment" value="e-wallet">
+                                        <i class="fas fa-mobile-alt"></i>
+                                        <h5>E-Wallet</h5>
+                                    </label>
+                                    
+                                    <label class="payment-method" onclick="selectPayment(this, 'cod')">
+                                        <input type="radio" name="payment" value="cod">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        <h5>COD</h5>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Order Notes -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="fas fa-sticky-note"></i>
+                                    Catatan Pesanan (Opsional)
+                                </h3>
+                                
+                                <div class="form-group">
+                                    <textarea id="orderNotes" name="orderNotes" class="form-control" rows="3" placeholder="Catatan khusus untuk pesanan Anda..."></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="checkout-summary">
+                        <h3 class="section-title">
+                            <i class="fas fa-receipt"></i>
+                            Ringkasan Pesanan
+                        </h3>
+                        
+                        <div id="checkout-items">
+                            ${generateCheckoutItems(cart)}
+                        </div>
+                        
+                        <div id="checkout-totals">
+                            ${generateCheckoutTotals(cart)}
+                        </div>
+                        
+                        <button type="submit" form="checkout-form" class="checkout-btn">
+                            <i class="fas fa-lock"></i>
+                            Bayar Sekarang
+                        </button>
+                        
+                        <div class="security-info">
+                            <i class="fas fa-shield-alt"></i>
+                            Pembayaran Anda aman dan terenkripsi
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Setup form submission
+            document.getElementById('checkout-form').addEventListener('submit', handleCheckout);
+
+            // Auto-fill user data if logged in
+            autoFillUserData();
+        }
+
+        function generateCheckoutItems(cart) {
+            return cart.map(item => `
+                <div class="checkout-item">
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-details">Ukuran: ${item.size} | Warna: ${item.color}</div>
+                        <div class="item-details">Qty: ${item.quantity}</div>
+                    </div>
+                    <div class="item-price">Rp ${(item.price * item.quantity).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateCheckoutTotals(cart) {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const shipping = 15000; // Default regular shipping
+            const total = subtotal + shipping;
+
+            return `
+                <div class="summary-row">
+                    <span>Subtotal (${cart.reduce((sum, item) => sum + item.quantity, 0)} item)</span>
+                    <span>Rp ${subtotal.toLocaleString()}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Ongkos Kirim</span>
+                    <span id="shipping-cost">Rp ${shipping.toLocaleString()}</span>
+                </div>
+                <div class="summary-row">
+                    <span>Total</span>
+                    <span id="total-cost">Rp ${total.toLocaleString()}</span>
+                </div>
+            `;
+        }
+
+        function selectShipping(element, method, cost) {
+            // Remove selected class from all shipping options
+            document.querySelectorAll('.shipping-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Update shipping cost
+            updateShippingCost(cost);
+        }
+
+        function selectPayment(element, method) {
+            // Remove selected class from all payment methods
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked method
+            element.classList.add('selected');
+        }
+
+        function updateShippingCost(cost) {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const total = subtotal + cost;
+
+            document.getElementById('shipping-cost').textContent = `Rp ${cost.toLocaleString()}`;
+            document.getElementById('total-cost').textContent = `Rp ${total.toLocaleString()}`;
+        }
+
+        function autoFillUserData() {
+            const currentUser = AuthSystem.getCurrentUser();
+            if (currentUser) {
+                document.getElementById('firstName').value = currentUser.firstName || '';
+                document.getElementById('lastName').value = currentUser.lastName || '';
+                document.getElementById('email').value = currentUser.email || '';
+                document.getElementById('phone').value = currentUser.phone || '';
+                document.getElementById('address').value = currentUser.address || '';
+            }
+        }
+
+        async function handleCheckout(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.querySelector('.checkout-btn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+            submitBtn.disabled = true;
+
+            try {
+                // Get form data
+                const formData = new FormData(e.target);
+                const checkoutData = {
+                    shipping: {
+                        address: {
+                            firstName: formData.get('firstName'),
+                            lastName: formData.get('lastName'),
+                            email: formData.get('email'),
+                            phone: formData.get('phone'),
+                            address: formData.get('address'),
+                            city: formData.get('city'),
+                            postalCode: formData.get('postalCode')
+                        },
+                        method: formData.get('shipping') || 'regular'
+                    },
+                    paymentMethod: formData.get('payment') || 'transfer',
+                    notes: formData.get('orderNotes') || ''
+                };
+
+                // Process checkout using PaymentSystem
+                const result = await PaymentSystem.processCheckout(checkoutData);
+
+                if (result.success) {
+                    // Show success message
+                    showNotification('Pesanan berhasil dibuat!', 'success');
+                    
+                    // Redirect to success page or history
+                    setTimeout(() => {
+                        window.location.href = 'history.html';
+                    }, 2000);
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } catch (error) {
+                showNotification('Terjadi kesalahan: ' + error.message, 'error');
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        function updateAuthMenu() {
+            const authMenu = document.getElementById('auth-menu');
+            const currentUser = AuthSystem.getCurrentUser();
+            
+            if (currentUser) {
+                authMenu.innerHTML = `
+                    <div class="user-menu">
+                        <a href="profile.html">${currentUser.firstName}</a>
+                        <a href="#" onclick="AuthSystem.logout()">Logout</a>
+                    </div>
+                `;
+            }
+        }
+
+        function showNotification(message, type) {
+            // This function is defined in script.js
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(message, type);
+            }
+        }
+    </script>
+</body>
+</html>

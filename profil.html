@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .profile-container {
+            margin-top: 100px;
+            padding: 2rem 0;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+        
+        .profile-sidebar {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+        
+        .profile-avatar {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .avatar-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #e74c3c;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0 auto 1rem;
+        }
+        
+        .profile-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .profile-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .profile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            color: #333;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .profile-menu a:hover,
+        .profile-menu a.active {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .profile-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        
+        .profile-section {
+            display: none;
+        }
+        
+        .profile-section.active {
+            display: block;
+        }
+        
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e74c3c;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: #333;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .order-item {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .order-id {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        
+        .email-item {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .email-item:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .email-item.unread {
+            background: #f0f8ff;
+            border-color: #3498db;
+        }
+        
+        .email-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .email-subject {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .email-date {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .email-preview {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-sidebar {
+                position: static;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html">Artikel</a></li>
+                    <li><a href="cart.html">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="wishlist.html">Wishlist <span id="wishlist-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html">Riwayat</a></li>
+                    <li id="auth-menu">
+                        <a href="login.html">Login</a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="profile-container">
+        <div class="container">
+            <div class="profile-grid">
+                <!-- Profile Sidebar -->
+                <div class="profile-sidebar">
+                    <div class="profile-avatar">
+                        <div class="avatar-circle" id="user-avatar">
+                            <!-- User initials will be displayed here -->
+                        </div>
+                        <h3 id="user-name">Loading...</h3>
+                        <p id="user-email">Loading...</p>
+                    </div>
+                    
+                    <ul class="profile-menu">
+                        <li><a href="#" class="active" onclick="showSection('overview')"><i class="fas fa-tachometer-alt"></i> Overview</a></li>
+                        <li><a href="#" onclick="showSection('personal')"><i class="fas fa-user"></i> Informasi Personal</a></li>
+                        <li><a href="#" onclick="showSection('orders')"><i class="fas fa-shopping-bag"></i> Pesanan Saya</a></li>
+                        <li><a href="#" onclick="showSection('emails')"><i class="fas fa-envelope"></i> Email & Notifikasi</a></li>
+                        <li><a href="#" onclick="showSection('security')"><i class="fas fa-shield-alt"></i> Keamanan</a></li>
+                        <li><a href="#" onclick="showSection('preferences')"><i class="fas fa-cog"></i> Preferensi</a></li>
+                    </ul>
+                </div>
+
+                <!-- Profile Content -->
+                <div class="profile-content">
+                    <!-- Overview Section -->
+                    <div id="overview-section" class="profile-section active">
+                        <div class="section-header">
+                            <h2>Overview</h2>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="total-orders">0</div>
+                                <div class="stat-label">Total Pesanan</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="total-spent">Rp 0</div>
+                                <div class="stat-label">Total Belanja</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="wishlist-items">0</div>
+                                <div class="stat-label">Item Wishlist</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="reviews-given">0</div>
+                                <div class="stat-label">Review Diberikan</div>
+                            </div>
+                        </div>
+                        
+                        <h3>Pesanan Terbaru</h3>
+                        <div id="recent-orders">
+                            <!-- Recent orders will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Personal Information Section -->
+                    <div id="personal-section" class="profile-section">
+                        <div class="section-header">
+                            <h2>Informasi Personal</h2>
+                        </div>
+                        
+                        <form id="personal-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="firstName">Nama Depan</label>
+                                    <input type="text" id="firstName" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastName">Nama Belakang</label>
+                                    <input type="text" id="lastName" class="form-control" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phone">Nomor Telepon</label>
+                                <input type="tel" id="phone" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="address">Alamat</label>
+                                <textarea id="address" class="form-control" rows="3"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Simpan Perubahan
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Orders Section -->
+                    <div id="orders-section" class="profile-section">
+                        <div class="section-header">
+                            <h2>Pesanan Saya</h2>
+                        </div>
+                        
+                        <div id="user-orders">
+                            <!-- User orders will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Emails Section -->
+                    <div id="emails-section" class="profile-section">
+                        <div class="section-header">
+                            <h2>Email & Notifikasi</h2>
+                        </div>
+                        
+                        <div id="user-emails">
+                            <!-- User emails will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Security Section -->
+                    <div id="security-section" class="profile-section">
+                        <div class="section-header">
+                            <h2>Keamanan</h2>
+                        </div>
+                        
+                        <form id="password-form">
+                            <div class="form-group">
+                                <label for="currentPassword">Password Saat Ini</label>
+                                <input type="password" id="currentPassword" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="newPassword">Password Baru</label>
+                                <input type="password" id="newPassword" class="form-control" required minlength="6">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirmPassword">Konfirmasi Password Baru</label>
+                                <input type="password" id="confirmPassword" class="form-control" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-key"></i> Ubah Password
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Preferences Section -->
+                    <div id="preferences-section" class="profile-section">
+                        <div class="section-header">
+                            <h2>Preferensi</h2>
+                        </div>
+                        
+                        <form id="preferences-form">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="newsletter"> 
+                                    Terima newsletter dan penawaran khusus
+                                </label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="orderUpdates"> 
+                                    Terima notifikasi update pesanan
+                                </label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="promotions"> 
+                                    Terima notifikasi promosi dan diskon
+                                </label>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Simpan Preferensi
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko fashion online terpercaya dengan koleksi terlengkap dan kualitas terbaik.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="index.html">Beranda</a></li>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="history.html">Riwayat</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Layanan</h4>
+                    <ul>
+                        <li><a href="#">Bantuan</a></li>
+                        <li><a href="#">Pengiriman</a></li>
+                        <li><a href="#">Pengembalian</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +62 123 456 789</li>
+                        <li><i class="fas fa-envelope"></i> info@fashionstore.com</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. Semua hak dilindungi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const currentUser = AuthSystem.getCurrentUser();
+            if (!currentUser) {
+                alert('Anda harus login terlebih dahulu!');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            loadUserProfile();
+            updateAuthMenu();
+        });
+
+        function loadUserProfile() {
+            const user = AuthSystem.getCurrentUser();
+            if (!user) return;
+
+            // Update user info in sidebar
+            document.getElementById('user-avatar').textContent = 
+                user.firstName.charAt(0) + user.lastName.charAt(0);
+            document.getElementById('user-name').textContent = 
+                `${user.firstName} ${user.lastName}`;
+            document.getElementById('user-email').textContent = user.email;
+
+            // Load personal information form
+            document.getElementById('firstName').value = user.firstName;
+            document.getElementById('lastName').value = user.lastName;
+            document.getElementById('email').value = user.email;
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('address').value = user.address || '';
+
+            // Load preferences
+            document.getElementById('newsletter').checked = user.newsletter || false;
+            document.getElementById('orderUpdates').checked = user.orderUpdates !== false;
+            document.getElementById('promotions').checked = user.promotions !== false;
+
+            // Load statistics
+            loadUserStatistics();
+            loadRecentOrders();
+            loadUserEmails();
+        }
+
+        function loadUserStatistics() {
+            const user = AuthSystem.getCurrentUser();
+            const transactions = FashionStore.getTransactions();
+            const userTransactions = transactions.filter(t => 
+                t.shipping?.address?.email === user.email
+            );
+
+            const totalOrders = userTransactions.length;
+            const totalSpent = userTransactions
+                .filter(t => t.status === 'completed')
+                .reduce((sum, t) => sum + t.total, 0);
+            const wishlistItems = WishlistSystem.getWishlistCount();
+            const reviewsGiven = ReviewSystem.getAllReviews()
+                .filter(r => r.userId === user.id).length;
+
+            document.getElementById('total-orders').textContent = totalOrders;
+            document.getElementById('total-spent').textContent = `Rp ${totalSpent.toLocaleString()}`;
+            document.getElementById('wishlist-items').textContent = wishlistItems;
+            document.getElementById('reviews-given').textContent = reviewsGiven;
+        }
+
+        function loadRecentOrders() {
+            const user = AuthSystem.getCurrentUser();
+            const transactions = FashionStore.getTransactions();
+            const userTransactions = transactions
+                .filter(t => t.shipping?.address?.email === user.email)
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 3);
+
+            const container = document.getElementById('recent-orders');
+            
+            if (userTransactions.length === 0) {
+                container.innerHTML = '<p>Belum ada pesanan.</p>';
+                return;
+            }
+
+            container.innerHTML = userTransactions.map(transaction => `
+                <div class="order-item">
+                    <div class="order-header">
+                        <span class="order-id">#${transaction.id}</span>
+                        <span class="status-badge status-${transaction.status}">
+                            ${getTransactionStatusText(transaction.status)}
+                        </span>
+                    </div>
+                    <p>Tanggal: ${formatDate(transaction.date)}</p>
+                    <p>Total: Rp ${transaction.total.toLocaleString()}</p>
+                    <p>${transaction.items.length} item(s)</p>
+                </div>
+            `).join('');
+        }
+
+        function loadUserEmails() {
+            const user = AuthSystem.getCurrentUser();
+            const emails = JSON.parse(localStorage.getItem('emails') || '[]');
+            const userEmails = emails
+                .filter(email => email.to === user.email)
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const container = document.getElementById('user-emails');
+            
+            if (userEmails.length === 0) {
+                container.innerHTML = '<p>Belum ada email.</p>';
+                return;
+            }
+
+            container.innerHTML = userEmails.map(email => `
+                <div class="email-item ${!email.read ? 'unread' : ''}" onclick="toggleEmail(this, '${email.date}')">
+                    <div class="email-header">
+                        <span class="email-subject">${email.subject}</span>
+                        <span class="email-date">${formatDate(email.date)}</span>
+                    </div>
+                    <div class="email-preview">
+                        ${email.content.substring(0, 100)}...
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.profile-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from menu items
+            document.querySelectorAll('.profile-menu a').forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(`${sectionName}-section`).classList.add('active');
+            
+            // Add active class to clicked menu item
+            event.target.classList.add('active');
+        }
+
+        function toggleEmail(element, emailDate) {
+            const emails = JSON.parse(localStorage.getItem('emails') || '[]');
+            const email = emails.find(e => e.date === emailDate);
+            
+            if (email && !email.read) {
+                email.read = true;
+                localStorage.setItem('emails', JSON.stringify(emails));
+                element.classList.remove('unread');
+            }
+
+            // Show full email content
+            const content = email ? email.content : 'Email tidak ditemukan';
+            alert(`${email.subject}\n\n${content}`);
+        }
+
+        // Form handlers
+        document.getElementById('personal-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value
+            };
+
+            const result = AuthSystem.updateProfile(formData);
+            
+            if (result.success) {
+                showNotification('Profil berhasil diperbarui!', 'success');
+                loadUserProfile(); // Refresh profile data
+            } else {
+                showNotification(result.message, 'error');
+            }
+        });
+
+        document.getElementById('password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const user = AuthSystem.getCurrentUser();
+            
+            if (user.password !== currentPassword) {
+                showNotification('Password saat ini salah!', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                showNotification('Konfirmasi password tidak cocok!', 'error');
+                return;
+            }
+            
+            const result = AuthSystem.updateProfile({ password: newPassword });
+            
+            if (result.success) {
+                showNotification('Password berhasil diubah!', 'success');
+                this.reset();
+            } else {
+                showNotification(result.message, 'error');
+            }
+        });
+
+        document.getElementById('preferences-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const preferences = {
+                newsletter: document.getElementById('newsletter').checked,
+                orderUpdates: document.getElementById('orderUpdates').checked,
+                promotions: document.getElementById('promotions').checked
+            };
+
+            const result = AuthSystem.updateProfile(preferences);
+            
+            if (result.success) {
+                showNotification('Preferensi berhasil disimpan!', 'success');
+            } else {
+                showNotification(result.message, 'error');
+            }
+        });
+
+        function getTransactionStatusText(status) {
+            const statusMap = {
+                'pending': 'Menunggu Pembayaran',
+                'processing': 'Diproses',
+                'completed': 'Selesai',
+                'cancelled': 'Dibatalkan'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function updateAuthMenu() {
+            const authMenu = document.getElementById('auth-menu');
+            const currentUser = AuthSystem.getCurrentUser();
+            
+            if (currentUser) {
+                authMenu.innerHTML = `
+                    <div class="user-menu">
+                        <a href="profile.html">${currentUser.firstName}</a>
+                        <a href="#" onclick="AuthSystem.logout()">Logout</a>
+                    </div>
+                `;
+            }
+        }
+
+        function showNotification(message, type) {
+            // This function is defined in script.js
+            if (typeof window.showNotification === 'function') {
+                window.showNotification(message, type);
+            }
+        }
+    </script>
+</body>
+</html>

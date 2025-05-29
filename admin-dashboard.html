@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-container {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            background: #f5f6fa;
+        }
+        
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        
+        .admin-sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .admin-content {
+            margin-left: 250px;
+            padding: 2rem;
+            transition: margin-left 0.3s;
+        }
+        
+        .admin-content.full-width {
+            margin-left: 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #34495e;
+            color: white;
+        }
+        
+        .sidebar-menu i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .dashboard-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+        
+        .dashboard-title {
+            margin: 0;
+            color: #333;
+        }
+        
+        .sidebar-toggle {
+            display: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-icon.products { color: #3498db; }
+        .stat-icon.orders { color: #e74c3c; }
+        .stat-icon.users { color: #2ecc71; }
+        .stat-icon.revenue { color: #f39c12; }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .dashboard-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-title {
+            margin: 0;
+            color: #333;
+            font-size: 1.2rem;
+        }
+        
+        .recent-orders-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .recent-orders-table th,
+        .recent-orders-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .recent-orders-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-processing { background: #cce5ff; color: #004085; }
+        .status-completed { background: #d1ecf1; color: #0c5460; }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .activity-icon.order { background: #e3f2fd; color: #1976d2; }
+        .activity-icon.user { background: #e8f5e8; color: #388e3c; }
+        .activity-icon.product { background: #fff3e0; color: #f57c00; }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .quick-action-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar-toggle {
+                display: block;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore Admin</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Lihat Website</a></li>
+                    <li><a href="admin-dashboard.html" class="active">Dashboard</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="admin-dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-products.html"><i class="fas fa-box"></i> Kelola Produk</a></li>
+                <li><a href="admin-articles.html"><i class="fas fa-newspaper"></i> Kelola Artikel</a></li>
+                <li><a href="admin-users.html"><i class="fas fa-users"></i> Kelola Pengguna</a></li>
+                <li><a href="admin-transactions.html"><i class="fas fa-receipt"></i> Kelola Transaksi</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Admin Content -->
+        <main class="admin-content" id="admin-content">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <div>
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="dashboard-title">Dashboard Admin</h1>
+                </div>
+                <div style="color: #666;">
+                    <i class="fas fa-calendar"></i>
+                    <span id="current-date"></span>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon products">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-number" id="total-products">0</div>
+                    <div class="stat-label">Total Produk</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon orders">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="stat-number" id="total-orders">0</div>
+                    <div class="stat-label">Total Pesanan</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number" id="total-users">0</div>
+                    <div class="stat-label">Total Pengguna</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon revenue">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="stat-number" id="total-revenue">Rp 0</div>
+                    <div class="stat-label">Total Pendapatan</div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Recent Orders -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pesanan Terbaru</h3>
+                        <a href="admin-transactions.html" class="btn btn-outline">Lihat Semua</a>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="recent-orders-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Pelanggan</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Tanggal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-orders">
+                                <!-- Recent orders will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Aktivitas Terbaru</h3>
+                    </div>
+                    <div id="recent-activity">
+                        <!-- Recent activity will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <a href="admin-products.html" class="quick-action-btn">
+                    <i class="fas fa-plus"></i>
+                    Tambah Produk
+                </a>
+                <a href="admin-articles.html" class="quick-action-btn">
+                    <i class="fas fa-edit"></i>
+                    Tulis Artikel
+                </a>
+                <a href="admin-transactions.html" class="quick-action-btn">
+                    <i class="fas fa-eye"></i>
+                    Lihat Pesanan
+                </a>
+                <a href="admin-users.html" class="quick-action-btn">
+                    <i class="fas fa-user-plus"></i>
+                    Kelola Pengguna
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            updateCurrentDate();
+        });
+
+        function loadDashboardData() {
+            // Load statistics
+            const products = getProducts();
+            const transactions = getTransactions();
+            const users = getUsers();
+
+            document.getElementById('total-products').textContent = products.length;
+            document.getElementById('total-orders').textContent = transactions.length;
+            document.getElementById('total-users').textContent = users.length;
+
+            // Calculate total revenue
+            const totalRevenue = transactions.reduce((sum, transaction) => {
+                return transaction.status === 'completed' ? sum + transaction.total : sum;
+            }, 0);
+            document.getElementById('total-revenue').textContent = `Rp ${totalRevenue.toLocaleString()}`;
+
+            // Load recent orders
+            loadRecentOrders();
+            
+            // Load recent activity
+            loadRecentActivity();
+        }
+
+        function loadRecentOrders() {
+            const transactions = getTransactions().slice(0, 5);
+            const tbody = document.getElementById('recent-orders');
+
+            if (transactions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #666; padding: 2rem;">
+                            Belum ada pesanan
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = transactions.map(transaction => `
+                <tr>
+                    <td>#${transaction.id}</td>
+                    <td>${transaction.shipping?.address?.firstName || 'N/A'} ${transaction.shipping?.address?.lastName || ''}</td>
+                    <td>Rp ${transaction.total.toLocaleString()}</td>
+                    <td>
+                        <span class="status-badge status-${transaction.status}">
+                            ${getStatusText(transaction.status)}
+                        </span>
+                    </td>
+                    <td>${formatDate(transaction.date)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function loadRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            
+            // Sample activity data
+            const activities = [
+                {
+                    type: 'order',
+                    title: 'Pesanan baru #1001',
+                    time: '2 menit yang lalu',
+                    icon: 'fas fa-shopping-cart'
+                },
+                {
+                    type: 'user',
+                    title: 'Pengguna baru mendaftar',
+                    time: '15 menit yang lalu',
+                    icon: 'fas fa-user-plus'
+                },
+                {
+                    type: 'product',
+                    title: 'Produk baru ditambahkan',
+                    time: '1 jam yang lalu',
+                    icon: 'fas fa-box'
+                },
+                {
+                    type: 'order',
+                    title: 'Pembayaran dikonfirmasi #1000',
+                    time: '2 jam yang lalu',
+                    icon: 'fas fa-check-circle'
+                },
+                {
+                    type: 'user',
+                    title: 'Review produk baru',
+                    time: '3 jam yang lalu',
+                    icon: 'fas fa-star'
+                }
+            ];
+
+            container.innerHTML = activities.map(activity => `
+                <div class="activity-item">
+                    <div class="activity-icon ${activity.type}">
+                        <i class="${activity.icon}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Menunggu',
+                'processing': 'Diproses',
+                'completed': 'Selesai',
+                'cancelled': 'Dibatalkan'
+            };
+            return statusMap[status] || status;
+        }
+
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', options);
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const content = document.getElementById('admin-content');
+            
+            sidebar.classList.toggle('show');
+            content.classList.toggle('full-width');
+        }
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                alert('Logout berhasil!');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('admin-sidebar');
+            const toggle = document.querySelector('.sidebar-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggle.contains(event.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

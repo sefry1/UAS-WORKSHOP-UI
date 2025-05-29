@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Transaksi - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .history-container {
+            margin-top: 100px;
+            padding: 2rem 0;
+            min-height: 70vh;
+        }
+        
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .transaction-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .transaction-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .transaction-header {
+            background: #f8f9fa;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .transaction-body {
+            padding: 1.5rem;
+        }
+        
+        .transaction-items {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .transaction-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .transaction-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        
+        .item-info {
+            flex: 1;
+        }
+        
+        .item-info h5 {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .item-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .item-price {
+            font-weight: bold;
+            color: #e74c3c;
+            align-self: center;
+        }
+        
+        .transaction-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-shipped {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .transaction-header {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+            
+            .transaction-footer {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html">Artikel</a></li>
+                    <li><a href="cart.html">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html" class="active">Riwayat</a></li>
+                    <li><a href="admin-dashboard.html" class="admin-link">Admin</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="history-container">
+        <div class="container">
+            <h1>Riwayat Transaksi</h1>
+            
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="status-filter">Status</label>
+                        <select id="status-filter" class="form-control" onchange="filterTransactions()">
+                            <option value="">Semua Status</option>
+                            <option value="pending">Menunggu Pembayaran</option>
+                            <option value="processing">Diproses</option>
+                            <option value="shipped">Dikirim</option>
+                            <option value="completed">Selesai</option>
+                            <option value="cancelled">Dibatalkan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date-from">Dari Tanggal</label>
+                        <input type="date" id="date-from" class="form-control" onchange="filterTransactions()">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-to">Sampai Tanggal</label>
+                        <input type="date" id="date-to" class="form-control" onchange="filterTransactions()">
+                    </div>
+                    <div class="form-group">
+                        <label for="search-order">Cari Pesanan</label>
+                        <input type="text" id="search-order" class="form-control" placeholder="ID Transaksi atau nama produk" oninput="filterTransactions()">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Transactions List -->
+            <div id="transactions-list">
+                <!-- Transactions will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko pakaian online terpercaya dengan koleksi fashion terbaru dan berkualitas.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="cart.html">Keranjang</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <p><i class="fas fa-envelope"></i> info@fashionstore.com</p>
+                    <p><i class="fas fa-phone"></i> +62 123 456 7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let allTransactions = [];
+        let filteredTransactions = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTransactions();
+            updateCartCount();
+        });
+
+        function loadTransactions() {
+            allTransactions = getTransactions();
+            filteredTransactions = [...allTransactions];
+            displayTransactions();
+        }
+
+        function displayTransactions() {
+            const container = document.getElementById('transactions-list');
+            
+            if (filteredTransactions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <h3>Belum Ada Transaksi</h3>
+                        <p>Anda belum memiliki riwayat transaksi.</p>
+                        <a href="catalog.html" class="btn btn-primary">Mulai Belanja</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredTransactions.map(transaction => `
+                <div class="transaction-card">
+                    <div class="transaction-header">
+                        <div>
+                            <h4 style="margin: 0; color: #333;">#${transaction.id}</h4>
+                            <p style="margin: 0; color: #666; font-size: 0.9rem;">${formatDate(transaction.date)}</p>
+                        </div>
+                        <span class="status-badge status-${transaction.status}">
+                            ${getStatusText(transaction.status)}
+                        </span>
+                    </div>
+                    
+                    <div class="transaction-body">
+                        <div class="transaction-items">
+                            ${transaction.items.map(item => `
+                                <div class="transaction-item">
+                                    <img src="${item.image}" alt="${item.name}">
+                                    <div class="item-info">
+                                        <h5>${item.name}</h5>
+                                        <p>Ukuran: ${item.size} | Warna: ${item.color}</p>
+                                        <p>Qty: ${item.quantity}</p>
+                                    </div>
+                                    <div class="item-price">
+                                        Rp ${(item.price * item.quantity).toLocaleString()}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="transaction-footer">
+                            <div>
+                                <p style="margin: 0; color: #666;">Total Pembayaran</p>
+                                <h4 style="margin: 0; color: #e74c3c;">Rp ${transaction.total.toLocaleString()}</h4>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button onclick="viewTransactionDetail(${transaction.id})" class="btn btn-outline">
+                                    <i class="fas fa-eye"></i> Detail
+                                </button>
+                                ${transaction.status === 'completed' ? `
+                                    <button onclick="reorderTransaction(${transaction.id})" class="btn btn-primary">
+                                        <i class="fas fa-redo"></i> Pesan Lagi
+                                    </button>
+                                ` : ''}
+                                ${transaction.status === 'pending' ? `
+                                    <button onclick="cancelTransaction(${transaction.id})" class="btn btn-danger">
+                                        <i class="fas fa-times"></i> Batalkan
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Menunggu Pembayaran',
+                'processing': 'Diproses',
+                'shipped': 'Dikirim',
+                'completed': 'Selesai',
+                'cancelled': 'Dibatalkan',
+                'pending_verification': 'Verifikasi Pembayaran',
+                'expired': 'Kadaluarsa'
+            };
+            return statusMap[status] || status;
+        }
+
+        function filterTransactions() {
+            const statusFilter = document.getElementById('status-filter').value;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+            const searchTerm = document.getElementById('search-order').value.toLowerCase();
+
+            filteredTransactions = allTransactions.filter(transaction => {
+                // Status filter
+                if (statusFilter && transaction.status !== statusFilter) {
+                    return false;
+                }
+
+                // Date filter
+                const transactionDate = new Date(transaction.date);
+                if (dateFrom && transactionDate < new Date(dateFrom)) {
+                    return false;
+                }
+                if (dateTo && transactionDate > new Date(dateTo + 'T23:59:59')) {
+                    return false;
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    const searchInId = transaction.id.toString().includes(searchTerm);
+                    const searchInItems = transaction.items.some(item => 
+                        item.name.toLowerCase().includes(searchTerm)
+                    );
+                    if (!searchInId && !searchInItems) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            displayTransactions();
+        }
+
+        function viewTransactionDetail(transactionId) {
+            const transaction = allTransactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+
+            // Create modal or redirect to detail page
+            alert(`Detail Transaksi #${transactionId}\n\nStatus: ${getStatusText(transaction.status)}\nTotal: Rp ${transaction.total.toLocaleString()}\nTanggal: ${formatDate(transaction.date)}\n\nFitur detail lengkap akan segera hadir!`);
+        }
+
+        function reorderTransaction(transactionId) {
+            const transaction = allTransactions.find(t => t.id === transactionId);
+            if (!transaction) return;
+
+            if (confirm('Apakah Anda ingin memesan ulang semua item dari transaksi ini?')) {
+                // Add all items to cart
+                transaction.items.forEach(item => {
+                    addToCart(item.productId || item.id, item.quantity, item.size, item.color);
+                });
+                
+                alert('Semua item berhasil ditambahkan ke keranjang!');
+                window.location.href = 'cart.html';
+            }
+        }
+
+        function cancelTransaction(transactionId) {
+            if (confirm('Apakah Anda yakin ingin membatalkan transaksi ini?')) {
+                updateTransactionStatus(transactionId, 'cancelled');
+                loadTransactions();
+                alert('Transaksi berhasil dibatalkan.');
+            }
+        }
+
+        // Set default date range (last 30 days)
+        window.addEventListener('load', function() {
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('date-to').value = today.toISOString().split('T')[0];
+            document.getElementById('date-from').value = thirtyDaysAgo.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

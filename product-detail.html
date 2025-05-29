@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Produk - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html">Artikel</a></li>
+                    <li><a href="cart.html">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html">Riwayat</a></li>
+                    <li><a href="admin-dashboard.html" class="admin-link">Admin</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main style="margin-top: 100px; padding: 2rem 0;">
+        <div class="container">
+            <div id="product-detail">
+                <!-- Product detail will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko pakaian online terpercaya dengan koleksi fashion terbaru dan berkualitas.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="cart.html">Keranjang</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <p><i class="fas fa-envelope"></i> info@fashionstore.com</p>
+                    <p><i class="fas fa-phone"></i> +62 123 456 7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let currentProduct = null;
+        let selectedSize = '';
+        let selectedColor = '';
+        let quantity = 1;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProductDetail();
+            updateCartCount();
+        });
+
+        function loadProductDetail() {
+            const productId = parseInt(getUrlParameter('id'));
+            if (!productId) {
+                document.getElementById('product-detail').innerHTML = `
+                    <div style="text-align: center; padding: 3rem;">
+                        <h2>Produk tidak ditemukan</h2>
+                        <p>Produk yang Anda cari tidak tersedia.</p>
+                        <a href="catalog.html" class="btn btn-primary">Kembali ke Katalog</a>
+                    </div>
+                `;
+                return;
+            }
+
+            currentProduct = getProducts().find(p => p.id === productId);
+            if (!currentProduct) {
+                document.getElementById('product-detail').innerHTML = `
+                    <div style="text-align: center; padding: 3rem;">
+                        <h2>Produk tidak ditemukan</h2>
+                        <p>Produk yang Anda cari tidak tersedia.</p>
+                        <a href="catalog.html" class="btn btn-primary">Kembali ke Katalog</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Set default selections
+            selectedSize = currentProduct.sizes[0];
+            selectedColor = currentProduct.colors[0];
+
+            displayProductDetail();
+        }
+
+        function displayProductDetail() {
+            document.getElementById('product-detail').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
+                    <div class="product-image">
+                        <img src="${currentProduct.image}" alt="${currentProduct.name}" 
+                             style="width: 100%; height: 500px; object-fit: cover; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                    </div>
+                    <div class="product-info">
+                        <nav style="margin-bottom: 1rem;">
+                            <a href="index.html" style="color: #666; text-decoration: none;">Beranda</a> > 
+                            <a href="catalog.html" style="color: #666; text-decoration: none;">Katalog</a> > 
+                            <span style="color: #e74c3c;">${currentProduct.name}</span>
+                        </nav>
+                        
+                        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: #333;">${currentProduct.name}</h1>
+                        <p style="font-size: 2rem; font-weight: bold; color: #e74c3c; margin-bottom: 1rem;">
+                            Rp ${currentProduct.price.toLocaleString()}
+                        </p>
+                        
+                        <div style="background: #f8f9fa; padding: 1rem; border-radius: 5px; margin-bottom: 1.5rem;">
+                            <p><strong>Kategori:</strong> ${currentProduct.category}</p>
+                            <p><strong>Stok:</strong> ${currentProduct.stock} pcs</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="margin-bottom: 0.5rem;">Deskripsi</h3>
+                            <p style="color: #666; line-height: 1.6;">${currentProduct.description}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 0.5rem;">Ukuran</h4>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                ${currentProduct.sizes.map(size => `
+                                    <button onclick="selectSize('${size}')" 
+                                            class="size-btn ${size === selectedSize ? 'active' : ''}"
+                                            style="padding: 8px 16px; border: 2px solid #ddd; background: ${size === selectedSize ? '#e74c3c' : 'white'}; 
+                                                   color: ${size === selectedSize ? 'white' : '#333'}; border-radius: 5px; cursor: pointer; transition: all 0.3s;">
+                                        ${size}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 0.5rem;">Warna</h4>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                ${currentProduct.colors.map(color => `
+                                    <button onclick="selectColor('${color}')" 
+                                            class="color-btn ${color === selectedColor ? 'active' : ''}"
+                                            style="padding: 8px 16px; border: 2px solid #ddd; background: ${color === selectedColor ? '#e74c3c' : 'white'}; 
+                                                   color: ${color === selectedColor ? 'white' : '#333'}; border-radius: 5px; cursor: pointer; transition: all 0.3s;">
+                                        ${color}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 2rem;">
+                            <h4 style="margin-bottom: 0.5rem;">Jumlah</h4>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div class="quantity-controls">
+                                    <button onclick="changeQuantity(-1)" class="quantity-btn">-</button>
+                                    <span class="quantity-display" id="quantity-display">${quantity}</span>
+                                    <button onclick="changeQuantity(1)" class="quantity-btn">+</button>
+                                </div>
+                                <span style="color: #666;">Maksimal ${currentProduct.stock} pcs</span>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                            <button onclick="addToCartWithOptions()" class="btn btn-primary" style="flex: 1;">
+                                <i class="fas fa-cart-plus"></i> Tambah ke Keranjang
+                            </button>
+                            <button onclick="buyNow()" class="btn btn-success" style="flex: 1;">
+                                <i class="fas fa-bolt"></i> Beli Sekarang
+                            </button>
+                        </div>
+                        
+                        <div style="background: #e8f5e8; padding: 1rem; border-radius: 5px; border-left: 4px solid #27ae60;">
+                            <p style="margin: 0; color: #27ae60;"><i class="fas fa-shield-alt"></i> Garansi kualitas produk</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Related Products -->
+                <div style="margin-top: 4rem;">
+                    <h2 style="text-align: center; margin-bottom: 2rem;">Produk Terkait</h2>
+                    <div class="products-grid" id="related-products">
+                        <!-- Related products will be loaded here -->
+                    </div>
+                </div>
+            `;
+
+            loadRelatedProducts();
+        }
+
+        function selectSize(size) {
+            selectedSize = size;
+            // Update button styles
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'white';
+                btn.style.color = '#333';
+            });
+            event.target.classList.add('active');
+            event.target.style.background = '#e74c3c';
+            event.target.style.color = 'white';
+        }
+
+        function selectColor(color) {
+            selectedColor = color;
+            // Update button styles
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'white';
+                btn.style.color = '#333';
+            });
+            event.target.classList.add('active');
+            event.target.style.background = '#e74c3c';
+            event.target.style.color = 'white';
+        }
+
+        function changeQuantity(change) {
+            const newQuantity = quantity + change;
+            if (newQuantity >= 1 && newQuantity <= currentProduct.stock) {
+                quantity = newQuantity;
+                document.getElementById('quantity-display').textContent = quantity;
+            }
+        }
+
+        function addToCartWithOptions() {
+            if (addToCart(currentProduct.id, quantity, selectedSize, selectedColor)) {
+                // Show success message
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Berhasil Ditambahkan!';
+                button.style.background = '#27ae60';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.background = '';
+                }, 2000);
+            }
+        }
+
+        function buyNow() {
+            addToCartWithOptions();
+            setTimeout(() => {
+                window.location.href = 'cart.html';
+            }, 1000);
+        }
+
+        function loadRelatedProducts() {
+            const relatedProducts = getProducts()
+                .filter(p => p.id !== currentProduct.id && p.category === currentProduct.category)
+                .slice(0, 3);
+            
+            const container = document.getElementById('related-products');
+            container.innerHTML = relatedProducts.map(product => `
+                <div class="product-card">
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p class="price">Rp ${product.price.toLocaleString()}</p>
+                        <a href="product-detail.html?id=${product.id}" class="btn btn-primary">Lihat Detail</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Responsive design for mobile
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                const productDetail = document.querySelector('#product-detail > div');
+                if (productDetail) {
+                    productDetail.style.gridTemplateColumns = '1fr';
+                    productDetail.style.gap = '2rem';
+                }
+            } else {
+                const productDetail = document.querySelector('#product-detail > div');
+                if (productDetail) {
+                    productDetail.style.gridTemplateColumns = '1fr 1fr';
+                    productDetail.style.gap = '3rem';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

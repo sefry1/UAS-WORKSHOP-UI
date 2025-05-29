@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Artikel - FashionStore Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-container {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            background: #f5f6fa;
+        }
+        
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        
+        .admin-sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .admin-content {
+            margin-left: 250px;
+            padding: 2rem;
+            transition: margin-left 0.3s;
+        }
+        
+        .admin-content.full-width {
+            margin-left: 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #34495e;
+            color: white;
+        }
+        
+        .sidebar-menu i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-toggle {
+            display: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        
+        .article-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .article-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .article-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .article-content {
+            padding: 1.5rem;
+        }
+        
+        .article-category {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .article-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .article-excerpt {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        
+        .article-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 95%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .image-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .image-upload:hover {
+            border-color: #e74c3c;
+            background: #fef5f5;
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        
+        .editor-toolbar {
+            border: 1px solid #ddd;
+            border-bottom: none;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .editor-btn {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .editor-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .content-editor {
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+            min-height: 300px;
+            padding: 1rem;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+        }
+        
+        .filters-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar-toggle {
+                display: block;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .articles-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore Admin</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Lihat Website</a></li>
+                    <li><a href="admin-dashboard.html">Dashboard</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-products.html"><i class="fas fa-box"></i> Kelola Produk</a></li>
+                <li><a href="admin-articles.html" class="active"><i class="fas fa-newspaper"></i> Kelola Artikel</a></li>
+                <li><a href="admin-users.html"><i class="fas fa-users"></i> Kelola Pengguna</a></li>
+                <li><a href="admin-transactions.html"><i class="fas fa-receipt"></i> Kelola Transaksi</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Admin Content -->
+        <main class="admin-content" id="admin-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div style="display: flex; align-items: center;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 style="margin: 0;">Kelola Artikel</h1>
+                </div>
+                <button class="btn btn-primary" onclick="openArticleModal()">
+                    <i class="fas fa-plus"></i> Tulis Artikel
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-section">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="category-filter">Kategori</label>
+                        <select id="category-filter" class="form-control" onchange="filterArticles()">
+                            <option value="">Semua Kategori</option>
+                            <option value="fashion-tips">Tips Fashion</option>
+                            <option value="trends">Tren Terbaru</option>
+                            <option value="styling">Styling Guide</option>
+                            <option value="seasonal">Fashion Musiman</option>
+                            <option value="accessories">Aksesoris</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status-filter">Status</label>
+                        <select id="status-filter" class="form-control" onchange="filterArticles()">
+                            <option value="">Semua Status</option>
+                            <option value="published">Dipublikasi</option>
+                            <option value="draft">Draft</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sort-filter">Urutkan</label>
+                        <select id="sort-filter" class="form-control" onchange="filterArticles()">
+                            <option value="newest">Terbaru</option>
+                            <option value="oldest">Terlama</option>
+                            <option value="title">Judul A-Z</option>
+                            <option value="views">Paling Populer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-articles">Cari Artikel</label>
+                        <input type="text" id="search-articles" class="form-control" placeholder="Judul artikel..." oninput="filterArticles()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Grid -->
+            <div class="articles-grid" id="articles-grid">
+                <!-- Articles will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Article Modal -->
+    <div id="article-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Tulis Artikel Baru</h3>
+                <button class="close" onclick="closeArticleModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="article-form">
+                    <input type="hidden" id="article-id">
+                    
+                    <div class="form-group">
+                        <label for="article-title">Judul Artikel *</label>
+                        <input type="text" id="article-title" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="article-category">Kategori *</label>
+                            <select id="article-category" class="form-control" required>
+                                <option value="">Pilih Kategori</option>
+                                <option value="fashion-tips">Tips Fashion</option>
+                                <option value="trends">Tren Terbaru</option>
+                                <option value="styling">Styling Guide</option>
+                                <option value="seasonal">Fashion Musiman</option>
+                                <option value="accessories">Aksesoris</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="article-author">Penulis *</label>
+                            <input type="text" id="article-author" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="article-excerpt">Ringkasan Artikel *</label>
+                        <textarea id="article-excerpt" class="form-control" rows="3" required placeholder="Ringkasan singkat artikel..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Gambar Artikel</label>
+                        <div class="image-upload" onclick="document.getElementById('article-image').click()">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #ccc; margin-bottom: 1rem;"></i>
+                            <p>Klik untuk upload gambar</p>
+                            <input type="file" id="article-image" accept="image/*" style="display: none;" onchange="previewImage(event)">
+                        </div>
+                        <img id="image-preview" class="image-preview" style="display: none;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="article-content">Konten Artikel *</label>
+                        <div class="editor-toolbar">
+                            <button type="button" class="editor-btn" onclick="formatText('bold')"><b>B</b></button>
+                            <button type="button" class="editor-btn" onclick="formatText('italic')"><i>I</i></button>
+                            <button type="button" class="editor-btn" onclick="formatText('underline')"><u>U</u></button>
+                            <button type="button" class="editor-btn" onclick="insertHeading()">H2</button>
+                            <button type="button" class="editor-btn" onclick="insertList()">List</button>
+                            <button type="button" class="editor-btn" onclick="insertLink()">Link</button>
+                        </div>
+                        <textarea id="article-content" class="form-control content-editor" required placeholder="Tulis konten artikel di sini..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="article-status">Status</label>
+                            <select id="article-status" class="form-control">
+                                <option value="draft">Draft</option>
+                                <option value="published">Publikasi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="article-featured">Artikel Unggulan</label>
+                            <select id="article-featured" class="form-control">
+                                <option value="false">Tidak</option>
+                                <option value="true">Ya</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeArticleModal()">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="saveArticle()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let allArticles = [];
+        let filteredArticles = [];
+        let editingArticleId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArticles();
+        });
+
+        function loadArticles() {
+            // Load articles from localStorage
+            const savedArticles = localStorage.getItem('articles');
+            if (savedArticles) {
+                allArticles = JSON.parse(savedArticles);
+            } else {
+                // Default articles data (hanya jika belum ada data)
+                allArticles = [
+                    {  
+                    id: 1,
+                    title: "10 Tips Berpakaian untuk Musim Hujan",
+                    excerpt: "Musim hujan tidak berarti Anda harus mengorbankan gaya. Pelajari tips berpakaian stylish yang tetap praktis untuk cuaca basah.",
+                    content: "Musim hujan seringkali menjadi tantangan tersendiri dalam berpakaian...",
+                    category: "fashion-tips",
+                    categoryName: "Tips Fashion",
+                    author: "Sarah Fashion",
+                    date: "2024-01-15",
+                    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=300&fit=crop",
+                    featured: true,
+                    views: 1250,
+                    status: "published"
+                },
+                {
+                    id: 2,
+                    title: "Tren Warna Fashion 2024",
+                    excerpt: "Warna-warna yang akan mendominasi dunia fashion tahun ini. Dari earth tone hingga bold colors yang berani.",
+                    content: "Tahun 2024 membawa berbagai tren warna yang menarik...",
+                    category: "trends",
+                    categoryName: "Tren Terbaru",
+                    author: "Maya Style",
+                    date: "2024-01-12",
+                    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&h=300&fit=crop",
+                    featured: false,
+                    views: 980,
+                    status: "published"
+                },
+                {
+                    id: 3,
+                    title: "Cara Mix and Match Outfit Kasual",
+                    excerpt: "Panduan lengkap untuk menciptakan outfit kasual yang stylish dengan item-item basic di lemari Anda.",
+                    content: "Mix and match adalah seni dalam berpakaian...",
+                    category: "styling",
+                    categoryName: "Styling Guide",
+                    author: "Rina Fashion",
+                    date: "2024-01-10",
+                    image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500&h=300&fit=crop",
+                    featured: false,
+                    views: 1100,
+                    status: "draft"
+                }
+            ];
+                    saveArticles(); // Simpan data default
+                }
+
+                filteredArticles = [...allArticles];
+                displayArticles();
+            }
+
+            // Tambahkan fungsi untuk menyimpan artikel
+            function saveArticles() {
+                localStorage.setItem('articles', JSON.stringify(allArticles));
+            }
+
+        function displayArticles() {
+            const container = document.getElementById('articles-grid');
+
+            if (filteredArticles.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #666;">
+                        <i class="fas fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                        Tidak ada artikel ditemukan
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredArticles.map(article => `
+                <div class="article-card">
+                    <img src="${article.image}" alt="${article.title}" class="article-image">
+                    <div class="article-content">
+                        <span class="article-category">${article.categoryName}</span>
+                        <h3 class="article-title">${article.title}</h3>
+                        <p class="article-excerpt">${article.excerpt}</p>
+                        <div class="article-meta">
+                            <div>
+                                <i class="fas fa-user"></i> ${article.author}
+                            </div>
+                            <div>
+                                <i class="fas fa-eye"></i> ${article.views}
+                            </div>
+                            <div>
+                                <span class="status-badge ${article.status === 'published' ? 'status-completed' : 'status-pending'}">
+                                    ${article.status === 'published' ? 'Dipublikasi' : 'Draft'}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="article-actions">
+                            <button class="btn-icon btn-edit" onclick="editArticle(${article.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteArticle(${article.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <a href="article-detail.html?id=${article.id}" target="_blank" class="btn-icon" style="background: #27ae60; color: white;" title="Lihat">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterArticles() {
+            const categoryFilter = document.getElementById('category-filter').value;
+            const statusFilter = document.getElementById('status-filter').value;
+            const sortFilter = document.getElementById('sort-filter').value;
+            const searchTerm = document.getElementById('search-articles').value.toLowerCase();
+
+            // Filter articles
+            filteredArticles = allArticles.filter(article => {
+                // Category filter
+                if (categoryFilter && article.category !== categoryFilter) {
+                    return false;
+                }
+
+                // Status filter
+                if (statusFilter && article.status !== statusFilter) {
+                    return false;
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    const searchInTitle = article.title.toLowerCase().includes(searchTerm);
+                    const searchInExcerpt = article.excerpt.toLowerCase().includes(searchTerm);
+                    if (!searchInTitle && !searchInExcerpt) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Sort articles
+            filteredArticles.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'newest':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'oldest':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'title':
+                        return a.title.localeCompare(b.title);
+                    case 'views':
+                        return b.views - a.views;
+                    default:
+                        return 0;
+                }
+            });
+
+            displayArticles();
+        }
+
+        function openArticleModal(articleId = null) {
+            editingArticleId = articleId;
+            const modal = document.getElementById('article-modal');
+            const title = document.getElementById('modal-title');
+            
+            if (articleId) {
+                title.textContent = 'Edit Artikel';
+                loadArticleData(articleId);
+            } else {
+                title.textContent = 'Tulis Artikel Baru';
+                resetForm();
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeArticleModal() {
+            document.getElementById('article-modal').style.display = 'none';
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('article-form').reset();
+            document.getElementById('article-id').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            editingArticleId = null;
+        }
+
+        function loadArticleData(articleId) {
+            const article = allArticles.find(a => a.id === articleId);
+            if (!article) return;
+
+            document.getElementById('article-id').value = article.id;
+            document.getElementById('article-title').value = article.title;
+            document.getElementById('article-category').value = article.category;
+            document.getElementById('article-author').value = article.author;
+            document.getElementById('article-excerpt').value = article.excerpt;
+            document.getElementById('article-content').value = article.content;
+            document.getElementById('article-status').value = article.status;
+            document.getElementById('article-featured').value = article.featured.toString();
+
+            // Set image preview
+            if (article.image) {
+                const preview = document.getElementById('image-preview');
+                preview.src = article.image;
+                preview.style.display = 'block';
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('image-preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function formatText(command) {
+            const textarea = document.getElementById('article-content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            let formattedText = '';
+            switch (command) {
+                case 'bold':
+                    formattedText = `**${selectedText}**`;
+                    break;
+                case 'italic':
+                    formattedText = `*${selectedText}*`;
+                    break;
+                case 'underline':
+                    formattedText = `<u>${selectedText}</u>`;
+                    break;
+            }
+            
+            textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+            textarea.focus();
+        }
+
+        function insertHeading() {
+            const textarea = document.getElementById('article-content');
+            const start = textarea.selectionStart;
+            const heading = '\n\n## Heading\n\n';
+            textarea.value = textarea.value.substring(0, start) + heading + textarea.value.substring(start);
+            textarea.focus();
+        }
+
+        function insertList() {
+            const textarea = document.getElementById('article-content');
+            const start = textarea.selectionStart;
+            const list = '\n\n- Item 1\n- Item 2\n- Item 3\n\n';
+            textarea.value = textarea.value.substring(0, start) + list + textarea.value.substring(start);
+            textarea.focus();
+        }
+
+        function insertLink() {
+            const textarea = document.getElementById('article-content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            const link = `[${selectedText || 'Link Text'}](https://example.com)`;
+            textarea.value = textarea.value.substring(0, start) + link + textarea.value.substring(end);
+            textarea.focus();
+        }
+
+        function saveArticle() {
+    const form = document.getElementById('article-form');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+// Get form data
+    const articleData = {
+        title: document.getElementById('article-title').value,
+        category: document.getElementById('article-category').value,
+        categoryName: getCategoryName(document.getElementById('article-category').value),
+        author: document.getElementById('article-author').value,
+        excerpt: document.getElementById('article-excerpt').value,
+        content: document.getElementById('article-content').value,
+        status: document.getElementById('article-status').value,
+        featured: document.getElementById('article-featured').value === 'true',
+        image: document.getElementById('image-preview').src || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=300&fit=crop',
+        date: new Date().toISOString().split('T')[0],
+        views: 0
+    };
+
+    if (editingArticleId) {
+        // Update existing article
+        const index = allArticles.findIndex(a => a.id === editingArticleId);
+        if (index !== -1) {
+            allArticles[index] = { ...allArticles[index], ...articleData };
+        }
+        alert('Artikel berhasil diperbarui!');
+    } else {
+        // Add new article
+        const newId = Math.max(...allArticles.map(a => a.id), 0) + 1;
+        allArticles.push({ id: newId, ...articleData });
+        alert('Artikel berhasil ditambahkan!');
+    }
+
+    // PENTING: Simpan ke localStorage
+    saveArticles();
+    
+    closeArticleModal();
+    filterArticles();
+}
+
+        function getCategoryName(category) {
+            const categoryMap = {
+                'fashion-tips': 'Tips Fashion',
+                'trends': 'Tren Terbaru',
+                'styling': 'Styling Guide',
+                'seasonal': 'Fashion Musiman',
+                'accessories': 'Aksesoris'
+            };
+            return categoryMap[category] || category;
+        }
+
+        function editArticle(articleId) {
+            openArticleModal(articleId);
+        }
+
+function deleteArticle(articleId) {
+    const article = allArticles.find(a => a.id === articleId);
+    if (!article) return;
+
+    if (confirm(`Apakah Anda yakin ingin menghapus artikel "${article.title}"?`)) {
+        allArticles = allArticles.filter(a => a.id !== articleId);
+        
+        // PENTING: Simpan ke localStorage
+        saveArticles();
+        
+        alert('Artikel berhasil dihapus!');
+        filterArticles();
+    }
+}
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const content = document.getElementById('admin-content');
+            
+            sidebar.classList.toggle('show');
+            content.classList.toggle('full-width');
+        }
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                alert('Logout berhasil!');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('article-modal');
+            if (event.target === modal) {
+                closeArticleModal();
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('admin-sidebar');
+            const toggle = document.querySelector('.sidebar-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggle.contains(event.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

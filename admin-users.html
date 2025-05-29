@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Pengguna - FashionStore Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-container {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+            background: #f5f6fa;
+        }
+        
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        
+        .admin-sidebar.hidden {
+            transform: translateX(-100%);
+        }
+        
+        .admin-content {
+            margin-left: 250px;
+            padding: 2rem;
+            transition: margin-left 0.3s;
+        }
+        
+        .admin-content.full-width {
+            margin-left: 0;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #34495e;
+            color: white;
+        }
+        
+        .sidebar-menu i {
+            margin-right: 0.75rem;
+            width: 20px;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-toggle {
+            display: none;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        
+        .users-filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .users-table-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .users-table th,
+        .users-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .users-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-details h5 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .user-details p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .role-admin {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .role-customer {
+            background: #3498db;
+            color: white;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-active { background: #d1ecf1; color: #0c5460; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        .status-banned { background: #e2e3e5; color: #383d41; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .btn-edit {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #2980b9;
+        }
+        
+        .btn-ban {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .btn-ban:hover {
+            background: #e67e22;
+        }
+        
+        .btn-delete {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background: #c0392b;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .pagination button.active {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .admin-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .sidebar-toggle {
+                display: block;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .users-table-container {
+                overflow-x: auto;
+            }
+            
+            .stats-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore Admin</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Lihat Website</a></li>
+                    <li><a href="admin-dashboard.html">Dashboard</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Admin Sidebar -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="admin-products.html"><i class="fas fa-box"></i> Kelola Produk</a></li>
+                <li><a href="admin-articles.html"><i class="fas fa-newspaper"></i> Kelola Artikel</a></li>
+                <li><a href="admin-users.html" class="active"><i class="fas fa-users"></i> Kelola Pengguna</a></li>
+                <li><a href="admin-transactions.html"><i class="fas fa-receipt"></i> Kelola Transaksi</a></li>
+                <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Admin Content -->
+        <main class="admin-content" id="admin-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div style="display: flex; align-items: center;">
+                    <button class="sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 style="margin: 0;">Kelola Pengguna</h1>
+                </div>
+                <button class="btn btn-primary" onclick="openUserModal()">
+                    <i class="fas fa-user-plus"></i> Tambah Pengguna
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-users">0</div>
+                    <div class="stat-label">Total Pengguna</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="active-users">0</div>
+                    <div class="stat-label">Pengguna Aktif</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="new-users">0</div>
+                    <div class="stat-label">Pengguna Baru (Bulan Ini)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="admin-users">0</div>
+                    <div class="stat-label">Admin</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="users-filters">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="role-filter">Role</label>
+                        <select id="role-filter" class="form-control" onchange="filterUsers()">
+                            <option value="">Semua Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="customer">Customer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status-filter">Status</label>
+                        <select id="status-filter" class="form-control" onchange="filterUsers()">
+                            <option value="">Semua Status</option>
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Tidak Aktif</option>
+                            <option value="banned">Diblokir</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sort-filter">Urutkan</label>
+                        <select id="sort-filter" class="form-control" onchange="filterUsers()">
+                            <option value="name">Nama A-Z</option>
+                            <option value="name-desc">Nama Z-A</option>
+                            <option value="date">Terdaftar Terbaru</option>
+                            <option value="date-desc">Terdaftar Terlama</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-users">Cari Pengguna</label>
+                        <input type="text" id="search-users" class="form-control" placeholder="Nama atau email..." oninput="filterUsers()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Pengguna</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Terdaftar</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- User Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Tambah Pengguna</h3>
+                <button class="close" onclick="closeUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="user-form">
+                    <input type="hidden" id="user-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="user-first-name">Nama Depan *</label>
+                            <input type="text" id="user-first-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-last-name">Nama Belakang *</label>
+                            <input type="text" id="user-last-name" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user-email">Email *</label>
+                        <input type="email" id="user-email" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="user-phone">Nomor Telepon</label>
+                            <input type="tel" id="user-phone" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="user-role">Role *</label>
+                            <select id="user-role" class="form-control" required>
+                                <option value="">Pilih Role</option>
+                                <option value="customer">Customer</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="user-address">Alamat</label>
+                        <textarea id="user-address" class="form-control" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="user-status">Status</label>
+                            <select id="user-status" class="form-control">
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Tidak Aktif</option>
+                                <option value="banned">Diblokir</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-password">Password</label>
+                            <input type="password" id="user-password" class="form-control" placeholder="Kosongkan jika tidak ingin mengubah">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeUserModal()">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="saveUser()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentPage = 1;
+        const usersPerPage = 10;
+        let editingUserId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+            updateStats();
+        });
+
+        function loadUsers() {
+            allUsers = getUsers();
+            filteredUsers = [...allUsers];
+            displayUsers();
+        }
+
+        function updateStats() {
+            const totalUsers = allUsers.length;
+            const activeUsers = allUsers.filter(user => user.status === 'active').length;
+            const adminUsers = allUsers.filter(user => user.role === 'admin').length;
+            
+            // Calculate new users this month
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const newUsers = allUsers.filter(user => {
+                const userDate = new Date(user.registeredDate);
+                return userDate.getMonth() === currentMonth && userDate.getFullYear() === currentYear;
+            }).length;
+
+            document.getElementById('total-users').textContent = totalUsers;
+            document.getElementById('active-users').textContent = activeUsers;
+            document.getElementById('new-users').textContent = newUsers;
+            document.getElementById('admin-users').textContent = adminUsers;
+        }
+
+        function displayUsers() {
+            const tbody = document.getElementById('users-table-body');
+            const startIndex = (currentPage - 1) * usersPerPage;
+            const endIndex = startIndex + usersPerPage;
+            const usersToShow = filteredUsers.slice(startIndex, endIndex);
+
+            if (usersToShow.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 3rem; color: #666;">
+                            <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                            Tidak ada pengguna ditemukan
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = usersToShow.map(user => `
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                ${user.firstName.charAt(0)}${user.lastName.charAt(0)}
+                            </div>
+                            <div class="user-details">
+                                <h5>${user.firstName} ${user.lastName}</h5>
+                                <p>${user.phone || 'Tidak ada nomor telepon'}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.email}</td>
+                    <td>
+                        <span class="role-badge role-${user.role}">
+                            ${user.role === 'admin' ? 'Admin' : 'Customer'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${user.status}">
+                            ${getStatusText(user.status)}
+                        </span>
+                    </td>
+                    <td>${formatDate(user.registeredDate)}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon btn-edit" onclick="editUser(${user.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon btn-ban" onclick="toggleUserStatus(${user.id})" title="${user.status === 'banned' ? 'Aktifkan' : 'Blokir'}">
+                                <i class="fas fa-${user.status === 'banned' ? 'unlock' : 'ban'}"></i>
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteUser(${user.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            displayPagination();
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'active': 'Aktif',
+                'inactive': 'Tidak Aktif',
+                'banned': 'Diblokir'
+            };
+            return statusMap[status] || status;
+        }
+
+        function displayPagination() {
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            const container = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `<button onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += `<button disabled>...</button>`;
+                }
+            }
+
+            // Next button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            container.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayUsers();
+            }
+        }
+
+        function filterUsers() {
+            const roleFilter = document.getElementById('role-filter').value;
+            const statusFilter = document.getElementById('status-filter').value;
+            const sortFilter = document.getElementById('sort-filter').value;
+            const searchTerm = document.getElementById('search-users').value.toLowerCase();
+
+            // Filter users
+            filteredUsers = allUsers.filter(user => {
+                // Role filter
+                if (roleFilter && user.role !== roleFilter) {
+                    return false;
+                }
+
+                // Status filter
+                if (statusFilter && user.status !== statusFilter) {
+                    return false;
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    const searchInName = `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm);
+                    const searchInEmail = user.email.toLowerCase().includes(searchTerm);
+                    if (!searchInName && !searchInEmail) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Sort users
+            filteredUsers.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'name':
+                        return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+                    case 'name-desc':
+                        return `${b.firstName} ${b.lastName}`.localeCompare(`${a.firstName} ${a.lastName}`);
+                    case 'date':
+                        return new Date(b.registeredDate) - new Date(a.registeredDate);
+                    case 'date-desc':
+                        return new Date(a.registeredDate) - new Date(b.registeredDate);
+                    default:
+                        return 0;
+                }
+            });
+
+            currentPage = 1;
+            displayUsers();
+        }
+
+        function openUserModal(userId = null) {
+            editingUserId = userId;
+            const modal = document.getElementById('user-modal');
+            const title = document.getElementById('modal-title');
+            
+            if (userId) {
+                title.textContent = 'Edit Pengguna';
+                loadUserData(userId);
+            } else {
+                title.textContent = 'Tambah Pengguna';
+                resetForm();
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeUserModal() {
+            document.getElementById('user-modal').style.display = 'none';
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('user-form').reset();
+            document.getElementById('user-id').value = '';
+            editingUserId = null;
+        }
+
+        function loadUserData(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            document.getElementById('user-id').value = user.id;
+            document.getElementById('user-first-name').value = user.firstName;
+            document.getElementById('user-last-name').value = user.lastName;
+            document.getElementById('user-email').value = user.email;
+            document.getElementById('user-phone').value = user.phone || '';
+            document.getElementById('user-role').value = user.role;
+            document.getElementById('user-address').value = user.address || '';
+            document.getElementById('user-status').value = user.status;
+        }
+
+        function saveUser() {
+            const form = document.getElementById('user-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Get form data
+            const userData = {
+                firstName: document.getElementById('user-first-name').value,
+                lastName: document.getElementById('user-last-name').value,
+                email: document.getElementById('user-email').value,
+                phone: document.getElementById('user-phone').value,
+                role: document.getElementById('user-role').value,
+                address: document.getElementById('user-address').value,
+                status: document.getElementById('user-status').value
+            };
+
+            // Check if email already exists (for new users or different email for existing users)
+            const existingUser = allUsers.find(u => u.email === userData.email && u.id !== editingUserId);
+            if (existingUser) {
+                alert('Email sudah digunakan oleh pengguna lain!');
+                return;
+            }
+
+            if (editingUserId) {
+                // Update existing user
+                const index = allUsers.findIndex(u => u.id === editingUserId);
+                if (index !== -1) {
+                    allUsers[index] = { ...allUsers[index], ...userData };
+                }
+                alert('Pengguna berhasil diperbarui!');
+            } else {
+                // Add new user
+                const newId = Math.max(...allUsers.map(u => u.id), 0) + 1;
+                const newUser = {
+                    id: newId,
+                    ...userData,
+                    registeredDate: new Date().toISOString().split('T')[0]
+                };
+                allUsers.push(newUser);
+                alert('Pengguna berhasil ditambahkan!');
+            }
+
+            // Update localStorage
+            localStorage.setItem('users', JSON.stringify(allUsers));
+
+            closeUserModal();
+            loadUsers();
+            updateStats();
+        }
+
+        function editUser(userId) {
+            openUserModal(userId);
+        }
+
+        function toggleUserStatus(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            const action = user.status === 'banned' ? 'mengaktifkan' : 'memblokir';
+            if (confirm(`Apakah Anda yakin ingin ${action} pengguna "${user.firstName} ${user.lastName}"?`)) {
+                user.status = user.status === 'banned' ? 'active' : 'banned';
+                
+                // Update localStorage
+                localStorage.setItem('users', JSON.stringify(allUsers));
+                
+                alert(`Pengguna berhasil ${user.status === 'banned' ? 'diblokir' : 'diaktifkan'}!`);
+                loadUsers();
+                updateStats();
+            }
+        }
+
+        function deleteUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) return;
+
+            if (confirm(`Apakah Anda yakin ingin menghapus pengguna "${user.firstName} ${user.lastName}"?\n\nTindakan ini tidak dapat dibatalkan!`)) {
+                allUsers = allUsers.filter(u => u.id !== userId);
+                
+                // Update localStorage
+                localStorage.setItem('users', JSON.stringify(allUsers));
+                
+                alert('Pengguna berhasil dihapus!');
+                loadUsers();
+                updateStats();
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const content = document.getElementById('admin-content');
+            
+            sidebar.classList.toggle('show');
+            content.classList.toggle('full-width');
+        }
+
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin logout?')) {
+                alert('Logout berhasil!');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('user-modal');
+            if (event.target === modal) {
+                closeUserModal();
+            }
+        }
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('admin-sidebar');
+            const toggle = document.querySelector('.sidebar-toggle');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !toggle.contains(event.target) && 
+                sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

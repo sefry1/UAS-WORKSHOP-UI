@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem 0;
+        }
+        
+        .auth-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: 0 20px;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .auth-header h1 {
+            color: #e74c3c;
+            margin-bottom: 0.5rem;
+        }
+        
+        .auth-header p {
+            color: #666;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .auth-form .form-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .auth-form .form-control {
+            padding-left: 3rem;
+        }
+        
+        .form-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            z-index: 2;
+        }
+        
+        .password-strength {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .strength-bar {
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+            margin-top: 0.25rem;
+            overflow: hidden;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        
+        .strength-weak { background: #e74c3c; width: 25%; }
+        .strength-fair { background: #f39c12; width: 50%; }
+        .strength-good { background: #f1c40f; width: 75%; }
+        .strength-strong { background: #27ae60; width: 100%; }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .terms-checkbox input[type="checkbox"] {
+            margin-top: 0.25rem;
+        }
+        
+        .terms-checkbox label {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .terms-checkbox a {
+            color: #e74c3c;
+            text-decoration: none;
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .auth-footer a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .success-message {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 0.75rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+                <p>Buat akun baru Anda</p>
+            </div>
+            
+            <div id="error-message" class="error-message"></div>
+            <div id="success-message" class="success-message"></div>
+            
+            <form class="auth-form" id="register-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <i class="fas fa-user form-icon"></i>
+                        <input type="text" id="firstName" class="form-control" placeholder="Nama Depan" required>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-user form-icon"></i>
+                        <input type="text" id="lastName" class="form-control" placeholder="Nama Belakang" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-envelope form-icon"></i>
+                    <input type="email" id="email" class="form-control" placeholder="Email" required>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-phone form-icon"></i>
+                    <input type="tel" id="phone" class="form-control" placeholder="Nomor Telepon" required>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-lock form-icon"></i>
+                    <input type="password" id="password" class="form-control" placeholder="Password" required minlength="6">
+                    <div class="password-strength">
+                        <div class="strength-text">Kekuatan password: <span id="strength-text">-</span></div>
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strength-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-lock form-icon"></i>
+                    <input type="password" id="confirmPassword" class="form-control" placeholder="Konfirmasi Password" required>
+                </div>
+                
+                <div class="form-group">
+                    <i class="fas fa-map-marker-alt form-icon"></i>
+                    <textarea id="address" class="form-control" placeholder="Alamat Lengkap" rows="3" style="padding-left: 3rem;"></textarea>
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="terms" required>
+                    <label for="terms">
+                        Saya setuju dengan <a href="#" onclick="showTerms()">Syarat & Ketentuan</a> 
+                        dan <a href="#" onclick="showPrivacy()">Kebijakan Privasi</a>
+                    </label>
+                </div>
+                
+                <div class="terms-checkbox">
+                    <input type="checkbox" id="newsletter">
+                    <label for="newsletter">
+                        Saya ingin menerima newsletter dan penawaran khusus
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-user-plus"></i> Daftar Sekarang
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Sudah punya akun? <a href="login.html">Masuk di sini</a></p>
+                <p><a href="index.html">← Kembali ke beranda</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strength = checkPasswordStrength(password);
+            updatePasswordStrength(strength);
+        });
+        
+        function checkPasswordStrength(password) {
+            let score = 0;
+            
+            if (password.length >= 6) score++;
+            if (password.length >= 10) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+            
+            if (score < 3) return { level: 'weak', text: 'Lemah' };
+            if (score < 4) return { level: 'fair', text: 'Cukup' };
+            if (score < 5) return { level: 'good', text: 'Baik' };
+            return { level: 'strong', text: 'Kuat' };
+        }
+        
+        function updatePasswordStrength(strength) {
+            const textEl = document.getElementById('strength-text');
+            const fillEl = document.getElementById('strength-fill');
+            
+            textEl.textContent = strength.text;
+            fillEl.className = `strength-fill strength-${strength.level}`;
+        }
+        
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirmPassword').value,
+                address: document.getElementById('address').value,
+                newsletter: document.getElementById('newsletter').checked
+            };
+            
+            // Validate passwords match
+            if (formData.password !== formData.confirmPassword) {
+                showMessage('Password dan konfirmasi password tidak cocok!', 'error');
+                return;
+            }
+            
+            const result = AuthSystem.register(formData);
+            
+            if (result.success) {
+                showMessage('Registrasi berhasil! Mengalihkan ke halaman login...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                showMessage(result.message, 'error');
+            }
+        });
+        
+        function showTerms() {
+            alert('Syarat & Ketentuan akan ditampilkan di sini.');
+        }
+        
+        function showPrivacy() {
+            alert('Kebijakan Privasi akan ditampilkan di sini.');
+        }
+        
+        function showMessage(message, type) {
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            if (type === 'error') {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            } else {
+                successDiv.textContent = message;
+                successDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artikel Fashion - FashionStore</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .articles-container {
+            margin-top: 100px;
+            padding: 2rem 0;
+        }
+        
+        .articles-hero {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .articles-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .articles-hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .articles-filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+        
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .article-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .article-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .article-content {
+            padding: 1.5rem;
+        }
+        
+        .article-category {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .article-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .article-excerpt {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 1rem;
+        }
+        
+        .article-author {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .featured-article {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .featured-article .article-image {
+            height: 100%;
+            min-height: 300px;
+        }
+        
+        .featured-article .article-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .featured-article .article-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 3rem;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .pagination button.active {
+            background: #e74c3c;
+            color: white;
+            border-color: #e74c3c;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        @media (max-width: 768px) {
+            .articles-hero h1 {
+                font-size: 2rem;
+            }
+            
+            .articles-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .featured-article {
+                grid-template-columns: 1fr;
+            }
+            
+            .featured-article .article-image {
+                min-height: 200px;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <h1><i class="fas fa-tshirt"></i> FashionStore</h1>
+            </div>
+            <nav class="nav-menu">
+                <ul>
+                    <li><a href="index.html">Beranda</a></li>
+                    <li><a href="catalog.html">Katalog</a></li>
+                    <li><a href="articles.html" class="active">Artikel</a></li>
+                    <li><a href="cart.html">Keranjang <span id="cart-count" class="cart-count">0</span></a></li>
+                    <li><a href="history.html">Riwayat</a></li>
+                    <li><a href="admin-dashboard.html" class="admin-link">Admin</a></li>
+                </ul>
+            </nav>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Articles Hero -->
+    <section class="articles-hero">
+        <div class="container">
+            <h1>Fashion Blog</h1>
+            <p>Tips, tren, dan inspirasi fashion terbaru untuk gaya hidup Anda</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="articles-container">
+        <div class="container">
+            <!-- Filters -->
+            <div class="articles-filters">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="category-filter">Kategori</label>
+                        <select id="category-filter" class="form-control" onchange="filterArticles()">
+                            <option value="">Semua Kategori</option>
+                            <option value="fashion-tips">Tips Fashion</option>
+                            <option value="trends">Tren Terbaru</option>
+                            <option value="styling">Styling Guide</option>
+                            <option value="seasonal">Fashion Musiman</option>
+                            <option value="accessories">Aksesoris</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sort-filter">Urutkan</label>
+                        <select id="sort-filter" class="form-control" onchange="filterArticles()">
+                            <option value="newest">Terbaru</option>
+                            <option value="oldest">Terlama</option>
+                            <option value="popular">Terpopuler</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="search-articles">Cari Artikel</label>
+                        <input type="text" id="search-articles" class="form-control" placeholder="Cari artikel..." oninput="filterArticles()">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Articles Grid -->
+            <div class="articles-grid" id="articles-grid">
+                <!-- Articles will be loaded here -->
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>FashionStore</h3>
+                    <p>Toko pakaian online terpercaya dengan koleksi fashion terbaru dan berkualitas.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Tautan Cepat</h4>
+                    <ul>
+                        <li><a href="catalog.html">Katalog</a></li>
+                        <li><a href="articles.html">Artikel</a></li>
+                        <li><a href="cart.html">Keranjang</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Kontak</h4>
+                    <p><i class="fas fa-envelope"></i> info@fashionstore.com</p>
+                    <p><i class="fas fa-phone"></i> +62 123 456 7890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 FashionStore. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        let allArticles = [];
+        let filteredArticles = [];
+        let currentPage = 1;
+        const articlesPerPage = 6;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadArticles();
+            updateCartCount();
+        });
+
+function loadArticles() {
+    // Load articles from localStorage
+    const savedArticles = localStorage.getItem('articles');
+    if (savedArticles) {
+        allArticles = JSON.parse(savedArticles);
+        // Filter hanya artikel yang dipublikasi
+        allArticles = allArticles.filter(article => article.status === 'published');
+    } else {
+        // Jika tidak ada data, gunakan data default
+        allArticles = [
+            // ... data default artikel
+                {
+                    id: 1,
+                    title: "10 Tips Berpakaian untuk Musim Hujan",
+                    excerpt: "Musim hujan tidak berarti Anda harus mengorbankan gaya. Pelajari tips berpakaian stylish yang tetap praktis untuk cuaca basah.",
+                    content: "Musim hujan seringkali menjadi tantangan tersendiri dalam berpakaian...",
+                    category: "fashion-tips",
+                    categoryName: "Tips Fashion",
+                    author: "Sarah Fashion",
+                    date: "2024-01-15",
+                    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=300&fit=crop",
+                    featured: true,
+                    views: 1250,
+                    readTime: "5 menit"
+                },
+                {
+                    id: 2,
+                    title: "Tren Warna Fashion 2024",
+                    excerpt: "Warna-warna yang akan mendominasi dunia fashion tahun ini. Dari earth tone hingga bold colors yang berani.",
+                    content: "Tahun 2024 membawa berbagai tren warna yang menarik...",
+                    category: "trends",
+                    categoryName: "Tren Terbaru",
+                    author: "Maya Style",
+                    date: "2024-01-12",
+                    image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&h=300&fit=crop",
+                    featured: false,
+                    views: 980,
+                    readTime: "4 menit"
+                },
+                {
+                    id: 3,
+                    title: "Cara Mix and Match Outfit Kasual",
+                    excerpt: "Panduan lengkap untuk menciptakan outfit kasual yang stylish dengan item-item basic di lemari Anda.",
+                    content: "Mix and match adalah seni dalam berpakaian...",
+                    category: "styling",
+                    categoryName: "Styling Guide",
+                    author: "Rina Fashion",
+                    date: "2024-01-10",
+                    image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500&h=300&fit=crop",
+                    featured: false,
+                    views: 1100,
+                    readTime: "6 menit"
+                },
+                {
+                    id: 4,
+                    title: "Fashion Sustainable: Trend Ramah Lingkungan",
+                    excerpt: "Bagaimana memilih fashion yang ramah lingkungan tanpa mengorbankan gaya. Tips berbelanja sustainable fashion.",
+                    content: "Sustainable fashion semakin menjadi perhatian...",
+                    category: "trends",
+                    categoryName: "Tren Terbaru",
+                    author: "Eco Fashion",
+                    date: "2024-01-08",
+                    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=500&h=300&fit=crop",
+                    featured: false,
+                    views: 850,
+                    readTime: "7 menit"
+                },
+                {
+                    id: 5,
+                    title: "Aksesoris Wajib untuk Outfit Sempurna",
+                    excerpt: "Aksesoris yang tepat dapat mengubah outfit biasa menjadi luar biasa. Pelajari aksesoris essential yang harus Anda miliki.",
+                    content: "Aksesoris adalah detail yang membuat perbedaan...",
+                    category: "accessories",
+                    categoryName: "Aksesoris",
+                    author: "Accessories Pro",
+                    date: "2024-01-05",
+                    image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=500&h=300&fit=crop",
+                    featured: false,
+                    views: 720,
+                    readTime: "5 menit"
+                },
+                {
+                    id: 6,
+                    title: "Fashion Musim Semi: Fresh and Bright",
+                    excerpt: "Sambut musim semi dengan outfit yang fresh dan cerah. Inspirasi look untuk cuaca yang mulai hangat.",
+                    content: "Musim semi adalah waktu yang tepat untuk bereksperimen...",
+                    category: "seasonal",
+                    categoryName: "Fashion Musiman",
+                    author: "Spring Style",
+                    date: "2024-01-03",
+                    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=500&h=300&fit=crop",
+                    featured: false,
+                    views: 650,
+                    readTime: "4 menit"
+                }
+];
+    }
+
+    filteredArticles = [...allArticles];
+    displayArticles();
+}
+
+
+        function displayArticles() {
+            const container = document.getElementById('articles-grid');
+            const startIndex = (currentPage - 1) * articlesPerPage;
+            const endIndex = startIndex + articlesPerPage;
+            const articlesToShow = filteredArticles.slice(startIndex, endIndex);
+
+            if (articlesToShow.length === 0) {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                        <i class="fas fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                        <h3>Artikel Tidak Ditemukan</h3>
+                        <p>Coba ubah filter atau kata kunci pencarian Anda.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = articlesToShow.map((article, index) => {
+                if (article.featured && currentPage === 1 && index === 0) {
+                    return `
+                        <div class="featured-article">
+                            <img src="${article.image}" alt="${article.title}" class="article-image">
+                            <div class="article-content">
+                                <span class="article-category">${article.categoryName}</span>
+                                <h2 class="article-title">${article.title}</h2>
+                                <p class="article-excerpt">${article.excerpt}</p>
+                                <div class="article-meta">
+                                    <div class="article-author">
+                                        <i class="fas fa-user"></i>
+                                        <span>${article.author}</span>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-calendar"></i>
+                                        <span>${formatDate(article.date)}</span>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-clock"></i>
+                                        <span>${article.readTime}</span>
+                                    </div>
+                                </div>
+                                <a href="article-detail.html?id=${article.id}" class="btn btn-primary">
+                                    Baca Selengkapnya <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="article-card">
+                            <img src="${article.image}" alt="${article.title}" class="article-image">
+                            <div class="article-content">
+                                <span class="article-category">${article.categoryName}</span>
+                                <h3 class="article-title">${article.title}</h3>
+                                <p class="article-excerpt">${article.excerpt}</p>
+                                <div class="article-meta">
+                                    <div class="article-author">
+                                        <i class="fas fa-user"></i>
+                                        <span>${article.author}</span>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-eye"></i>
+                                        <span>${article.views}</span>
+                                    </div>
+                                </div>
+                                <a href="article-detail.html?id=${article.id}" class="btn btn-primary">
+                                    Baca Artikel <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            displayPagination();
+        }
+
+        function displayPagination() {
+            const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
+            const container = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `<button onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += `<button disabled>...</button>`;
+                }
+            }
+
+            // Next button
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+
+            container.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                displayArticles();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function filterArticles() {
+            const categoryFilter = document.getElementById('category-filter').value;
+            const sortFilter = document.getElementById('sort-filter').value;
+            const searchTerm = document.getElementById('search-articles').value.toLowerCase();
+
+            // Filter by category
+            filteredArticles = allArticles.filter(article => {
+                if (categoryFilter && article.category !== categoryFilter) {
+                    return false;
+                }
+                
+                // Search filter
+                if (searchTerm) {
+                    const searchInTitle = article.title.toLowerCase().includes(searchTerm);
+                    const searchInExcerpt = article.excerpt.toLowerCase().includes(searchTerm);
+                    const searchInCategory = article.categoryName.toLowerCase().includes(searchTerm);
+                    if (!searchInTitle && !searchInExcerpt && !searchInCategory) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+
+            // Sort articles
+            filteredArticles.sort((a, b) => {
+                switch (sortFilter) {
+                    case 'newest':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'oldest':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'popular':
+                        return b.views - a.views;
+                    default:
+                        return 0;
+                }
+            });
+
+            currentPage = 1;
+            displayArticles();
+        }
+    </script>
+</body>
+</html>
